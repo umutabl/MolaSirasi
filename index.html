@@ -5,7 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mola Sırası</title>
   <style>
-    :root { --primary: #002f6c; --accent: #f9a825; --light: #ffffff; --gray-lt: #f5f5f5; --gray-md: #e0e0e0; --font: 'Helvetica Neue', Arial, sans-serif; }
+    :root {
+      --primary: #002f6c;
+      --accent: #f9a825;
+      --light: #ffffff;
+      --gray-lt: #f5f5f5;
+      --gray-md: #e0e0e0;
+      --font: 'Helvetica Neue', Arial, sans-serif;
+    }
     * { box-sizing: border-box; margin:0; padding:0; }
     body { font-family: var(--font); background: var(--gray-lt); color: var(--primary); }
     .container { max-width:960px; margin:auto; padding:0 16px; }
@@ -59,9 +66,9 @@
         const res = await fetch(`${BASE_URL}&cacheBuster=${Date.now()}`, {cache:'no-store'});
         const txt = await res.text();
         const json = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}')+1));
-        // İlk satır (başlık) atlanıyor
-        const allRows = json.table.rows.slice(1);
-        const dataRows = allRows.filter(r => r.c[1] && r.c[1].v);
+
+        const allRows = json.table.rows;
+        const dataRows = allRows.filter(r => r.c[1] && r.c[1].v); // İsim varsa
 
         tbody.innerHTML = '';
         if (!dataRows.length) {
@@ -71,7 +78,7 @@
             const ts = row.c[0].f || row.c[0].v;
             const name = row.c[1].v;
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${i+1}</td><td>${ts}</td><td>${name}</td>`;
+            tr.innerHTML = `<td>${i + 1}</td><td>${ts}</td><td>${name}</td>`;
             tbody.appendChild(tr);
           });
         }
