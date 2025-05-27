@@ -231,7 +231,10 @@
           });
 
         } else {
-          tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Sırada kimse yok.</td></tr>`;
+          // Liste boşsa, son kişiye bildirim gönder
+          if (previousFirst) {
+            sendNotification(`${previousFirst}, mola sırası sende!`);
+          }
         }
 
         // Sonraki yenileme için 1. kişiyi sakla
