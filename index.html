@@ -5,21 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mola Sırası</title>
   <style>
-    :root { --primary: #002f6c; --accent: #f9a825; --light: #ffffff; --gray-lt: #f5f5f5; --gray-md: #e0e0e0; --font: 'Helvetica Neue', Arial, sans-serif; }
+    :root {
+      --primary: #002f6c;
+      --accent:  #f9a825;
+      --light:   #ffffff;
+      --gray-lt: #f5f5f5;
+      --gray-md: #e0e0e0;
+      --font:    'Helvetica Neue', Arial, sans-serif;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: var(--font); background: var(--gray-lt); color: var(--primary); }
-    .container { width: 100%; max-width: 960px; margin: auto; padding: 0 16px; }
+    .container { max-width: 960px; margin: auto; padding: 0 16px; }
     header { background: var(--light); border-bottom: 2px solid var(--gray-md); }
-    header .container { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; }
-    .logo { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
+    header .container { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
+    .logo { font-size: 1.4rem; font-weight: bold; }
     .logo span { color: var(--accent); }
     .hero { background: var(--light); border-bottom: 2px solid var(--gray-md); }
     .hero .container { text-align: center; padding: 24px 0; }
     .hero h1 { font-size: 2rem; margin-bottom: 8px; }
     .hero p { color: #555; }
-    .btn { background: var(--primary); color: var(--light); padding: 10px 20px; border-radius: 4px; text-decoration: none; font-weight: 500; transition: background .2s; display: inline-block; }
+    .btn { background: var(--primary); color: var(--light); padding: 10px 20px; border-radius: 4px; text-decoration: none; font-weight: 500; transition: background .2s; }
     .btn:hover { background: #001f4c; }
     .table-wrapper { background: var(--light); padding: 24px 0; }
+    .table-container { position: relative; }
     table { width: 100%; border-collapse: collapse; background: var(--light); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     th, td { padding: 12px; text-align: left; }
     thead { background: var(--primary); color: var(--light); }
@@ -27,7 +35,6 @@
     .spinner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 4px solid var(--gray-md); border-top: 4px solid var(--primary); border-radius: 50%; width: 36px; height: 36px; animation: spin 1s linear infinite; display: none; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .placeholder { text-align: center; color: #555; font-style: italic; padding: 12px; }
-    .table-container { position: relative; }
   </style>
 </head>
 <body>
@@ -58,27 +65,29 @@
   </div>
 
   <script>
-    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlLXd3uiQhC94TAFr8I141dhYSiLirORa9wgGYCKKDBt0pDoIa9Unw9XB3sNV1ky7zIeCY0ek5n7OB/pub?gid=1933616179&single=true&output=csv";
-    function parseCSV(text) {
-      return text.trim().split('\n').slice(1).map(line => {
-        const [ts, name] = line.split(',').map(s => s.replace(/"/g,'').trim());
-        return ts && name ? { ts, name } : null;
-      }).filter(Boolean);
-    }
+    // JSON endpoint için ayarlar
+    const SHEET_ID   = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
+    const SHEET_NAME = 'Form Responses 1';
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json&cacheBuster=${Date.now()}`;
 
     async function refresh() {
       const spinner = document.getElementById('spinner');
-      const tbody = document.querySelector('#molaTable tbody');
+      const tbody   = document.querySelector('#molaTable tbody');
       spinner.style.display = 'block';
       try {
-        const res = await fetch(`${csvUrl}&_cb=${Date.now()}`, { cache: 'no-store' });
-        const text = await res.text();
-        const data = parseCSV(text);
+        const res  = await fetch(url, { cache: 'no-store' });
+        const txt  = await res.text();
+        // JSON parse için callback öncesi ve sonrası kırpma
+        const json = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
+        const rows = json.table.rows
+          .filter(r => r.c[0] && r.c[1])
+          .map(r => ({ ts: r.c[0].v, name: r.c[1].v }));
+
         tbody.innerHTML = '';
-        if (data.length) {
-          data.forEach((row, i) => {
+        if (rows.length) {
+          rows.forEach((r, i) => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${i+1}</td><td>${row.ts}</td><td>${row.name}</td>`;
+            tr.innerHTML = `<td>${i + 1}</td><td>${r.ts}</td><td>${r.name}</td>`;
             tbody.appendChild(tr);
           });
         } else {
@@ -86,8 +95,8 @@
           tr.innerHTML = `<td colspan="3" class="placeholder">Şu an kimse sırada değil.</td>`;
           tbody.appendChild(tr);
         }
-      } catch (err) {
-        console.error('Veri alınırken hata:', err);
+      } catch (e) {
+        console.error('Veri çekilemedi:', e);
       } finally {
         spinner.style.display = 'none';
       }
