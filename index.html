@@ -116,20 +116,37 @@
   <script>
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlLXd3uiQhC94TAFr8I141dhYSiLirORa9wgGYCKKDBt0pDoIa9Unw9XB3sNV1ky7zIeCY0ek5n7OB/pub?gid=1933616179&single=true&output=csv";
 
+    function parseCSV(data) {
+      const lines = data.trim().split('\n');
+      const result = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // virgülleri dikkatli ayır
+        const timestamp = row[0]?.replace(/"/g, '').trim();
+        const name = row[1]?.replace(/"/g, '').trim();
+
+        if (timestamp && name) {
+          result.push({ timestamp, name });
+        }
+      }
+
+      return result;
+    }
+
     function refreshTable() {
       fetch(csvUrl)
         .then(response => response.text())
         .then(data => {
-          const rows = data.trim().split('\n').slice(1); // başlığı atla
+          const rows = parseCSV(data);
           const tbody = document.querySelector('#molaTable tbody');
           tbody.innerHTML = '';
+
           rows.forEach((row, index) => {
-            const cols = row.split(',');
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td>${index + 1}</td>
-              <td>${cols[0]}</td>
-              <td>${cols[1]}</td>
+              <td>${row.timestamp}</td>
+              <td>${row.name}</td>
             `;
             tbody.appendChild(tr);
           });
@@ -138,7 +155,7 @@
 
     window.onload = () => {
       refreshTable();
-      setInterval(refreshTable, 1000); // 1 saniyede bir yenile
+      setInterval(refreshTable, 1000); // 1 saniyede bir güncelle
     };
   </script>
 </body>
