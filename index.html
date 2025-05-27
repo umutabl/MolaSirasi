@@ -152,6 +152,9 @@
     const SHEET_NAME = 'Form Responses 1';
     const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
 
+    let previousData = [];  // Önceki veriyi saklamak için dizi
+    let deletedData = [];   // Son 5 saniye içinde silinen öğeleri saklamak için dizi
+
     async function refresh() {
       const spinner = document.getElementById('spinner');
       const tbody = document.querySelector('#molaTable tbody');
@@ -179,6 +182,22 @@
         if (dataRows.length === 0) {
           tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Sırada kimse yok.</td></tr>`;
         } else {
+          // Silinen öğeleri tespit et
+          const currentNames = dataRows.map(row => row.c[1].v);  // Mevcut isimler
+          const previousNames = previousData.map(row => row.c[1].v);  // Önceki isimler
+
+          // Silinen isimleri bul
+          const deletedNames = previousNames.filter(name => !currentNames.includes(name));
+          if (deletedNames.length > 0) {
+            // Silinen kişileri bildirim olarak göster
+            alert(`Silinen kişi(ler): ${deletedNames.join(', ')}`);
+            deletedData = deletedNames; // Son 5 saniyede silinen veriyi kaydet
+          }
+
+          // Önceki veriyi güncelle
+          previousData = dataRows;
+
+          // Verileri tabloya ekle
           dataRows.forEach((row, i) => {
             const ts = row.c[0].f || row.c[0].v || '-';
             const name = row.c[1].v || '-';
@@ -193,11 +212,16 @@
       } finally {
         spinner.style.display = 'none';
       }
+
+      // 5 saniye sonra silinen verileri temizle
+      setTimeout(() => {
+        deletedData = []; // 5 saniye sonra silinen veriyi sıfırla
+      }, 5000);
     }
 
     window.addEventListener('load', () => {
       refresh();
-      setInterval(refresh, 5000);
+      setInterval(refresh, 5000);  // Her 5 saniyede bir veri güncelle
     });
   </script>
 </body>
