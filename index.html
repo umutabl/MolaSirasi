@@ -154,7 +154,7 @@
     const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
 
     let previousData = [];  // Önceki veriyi saklamak için dizi
-    let deletedData = [];   // Son 5 saniye içinde silinen öğeleri saklamak için dizi
+    let previousFirst = null; // Önceki turun 1. sırasındaki kişi
 
     // Bildirim iznini almak için
     function requestNotificationPermission() {
@@ -213,20 +213,15 @@
           const currentNames = dataRows.map(row => row.c[1].v);  // Mevcut isimler
           const previousNames = previousData.map(row => row.c[1].v);  // Önceki isimler
 
-          // Silinen isimleri bul
-          const deletedNames = previousNames.filter(name => !currentNames.includes(name));
-
-          // Eğer silinen kişi varsa bildirim gönder
-          if (deletedNames.length > 0) {
-            const message = `Molaya çıkabilirsin, silinen kişi(ler): ${deletedNames.join(', ')}`;
-            sendNotification(message);  // Silinen kişilere bildirim gönder
-            deletedData = deletedNames; // Son 5 saniyede silinen veriyi kaydet
+          // Eğer önceki 1. kişi artık listede yoksa bildirim gönder
+          if (previousFirst && !currentNames.includes(previousFirst)) {
+            sendNotification(`${previousFirst}, mola sırası sende!`);
           }
 
           // Önceki veriyi güncelle
           previousData = dataRows;
 
-          // Verileri tabloya ekle
+          // Tabloyu güncelle
           dataRows.forEach((row, i) => {
             const ts = row.c[0].f || row.c[0].v || '-';
             const name = row.c[1].v || '-';
@@ -234,20 +229,20 @@
             tr.innerHTML = `<td>${i + 1}</td><td>${ts}</td><td>${name}</td>`;
             tbody.appendChild(tr);
           });
+
         } else {
           tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Sırada kimse yok.</td></tr>`;
         }
+
+        // Sonraki yenileme için 1. kişiyi sakla
+        previousFirst = dataRows[0]?.c[1]?.v || null;
+
       } catch (error) {
         console.error('Hata oluştu:', error);
         tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
       } finally {
         spinner.style.display = 'none';
       }
-
-      // 5 saniye sonra silinen verileri temizle
-      setTimeout(() => {
-        deletedData = []; // 5 saniye sonra silinen veriyi sıfırla
-      }, 5000);
     }
 
     window.addEventListener('load', () => {
