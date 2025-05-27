@@ -28,7 +28,20 @@
       background: var(--light);
       border-bottom: 2px solid var(--gray-md);
     }
-    .hero, .table-wrapper {
+    header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+    }
+    .logo {
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+    .logo span {
+      color: var(--accent);
+    }
+    .hero {
       background: var(--light);
       border-bottom: 2px solid var(--gray-md);
     }
@@ -62,13 +75,17 @@
     .btn:hover {
       background: #001f4c;
     }
+    .table-wrapper {
+      background: var(--light);
+      padding: 24px 0;
+    }
     .table-container {
       position: relative;
-      padding: 24px 0;
     }
     table {
       width: 100%;
       border-collapse: collapse;
+      background: var(--light);
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     th, td {
@@ -112,7 +129,6 @@
       <div class="logo">Turk<span>Net</span></div>
     </div>
   </header>
-
   <section class="hero">
     <div class="container">
       <h1><span class="accent-icon">⏱</span>Mola Sırası</h1>
@@ -120,7 +136,6 @@
       <a href="https://forms.gle/wFexWKf69M3uJEAx5" target="_blank" class="btn">Mola Sırasına Katıl</a>
     </div>
   </section>
-
   <div class="table-wrapper">
     <div class="container table-container">
       <div class="spinner" id="spinner"></div>
@@ -134,77 +149,111 @@
   </div>
 
   <script>
-    const SHEET_ID   = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
+    const SHEET_ID = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
     const SHEET_NAME = 'Form Responses 1';
-    const BASE_URL   =
-      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?` +
-      `sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
+    const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
 
-    let previousNames = [];  // Önceki turdaki yalnızca isimler
+    let previousData = [];  // Önceki veriyi saklamak için dizi
+    let deletedData = [];   // Son 5 saniye içinde silinen öğeleri saklamak için dizi
 
+    // Bildirim iznini almak için
     function requestNotificationPermission() {
       if (Notification.permission !== "granted") {
-        Notification.requestPermission();
+        Notification.requestPermission().then(permission => {
+          console.log("Bildirim izni verildi:", permission);
+        }).catch(err => {
+          console.error("Bildirim izni alınamadı:", err);
+        });
+      } else {
+        console.log("Bildirim izni zaten verilmiş.");
       }
     }
 
+    // Tarayıcı bildirim fonksiyonu
     function sendNotification(message) {
       if (Notification.permission === "granted") {
-        new Audio('https://www.soundjay.com/button/beep-07.wav').play();
-        new Notification(message);
+        // Bildirim sesi
+        const notificationSound = new Audio('https://www.soundjay.com/button/beep-07.wav');  // Ses dosyasını ekliyoruz
+        notificationSound.play();  // Ses çal
+
+        new Notification(message);  // Bildirimi gönder
+        console.log("Bildirim gönderildi:", message);  // Bildirim gönderildiğini konsola yazdır
+      } else {
+        console.log("Bildirim izni verilmedi.");  // Bildirim izni verilmediyse
       }
     }
 
+    // 5 saniyede bir veriyi güncelleyen fonksiyon
     async function refresh() {
       const spinner = document.getElementById('spinner');
-      const tbody   = document.querySelector('#molaTable tbody');
+      const tbody = document.querySelector('#molaTable tbody');
       spinner.style.display = 'block';
 
       try {
-        const res  = await fetch(`${BASE_URL}&cacheBuster=${Date.now()}`, { cache: 'no-store' });
-        const txt  = await res.text();
+        const res = await fetch(`${BASE_URL}&cacheBuster=${Date.now()}`, { cache: 'no-store' });
+        const txt = await res.text();
         const json = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
-        const rows = json.table.rows || [];
+        const rows = json.table.rows;
 
-        // Mevcut isimler
-        const currentNames = rows
-          .map(r => r.c?.[1]?.v)
-          .filter(n => n && n.toLowerCase() !== 'ad soyad');
+        const dataRows = rows.filter(row => {
+          const time = row.c?.[0]?.v;
+          const name = row.c?.[1]?.v;
+          return (
+            time &&
+            name &&
+            name.toLowerCase() !== "ad soyad" &&
+            time.toLowerCase() !== "zaman damgası"
+          );
+        });
 
-        // Silinenleri bul ve bildir
-        const deleted = previousNames.filter(n => !currentNames.includes(n));
-        if (deleted.length) {
-          sendNotification(`Molaya çıkabilirsin, silinen kişi(ler): ${deleted.join(', ')}`);
-        }
-
-        // Tabloyu güncelle
         tbody.innerHTML = '';
-        if (currentNames.length) {
-          rows.forEach((r, i) => {
-            const ts   = r.c[0].f || r.c[0].v || '-';
-            const name = r.c[1].v || '-';
-            const tr   = document.createElement('tr');
+
+        if (dataRows.length > 0) {
+          // Silinen öğeleri tespit et
+          const currentNames = dataRows.map(row => row.c[1].v);  // Mevcut isimler
+          const previousNames = previousData.map(row => row.c[1].v);  // Önceki isimler
+
+          // Silinen isimleri bul
+          const deletedNames = previousNames.filter(name => !currentNames.includes(name));
+
+          // Eğer silinen kişi varsa bildirim gönder
+          if (deletedNames.length > 0) {
+            const message = `Molaya çıkabilirsin, silinen kişi(ler): ${deletedNames.join(', ')}`;
+            sendNotification(message);  // Silinen kişilere bildirim gönder
+            deletedData = deletedNames; // Son 5 saniyede silinen veriyi kaydet
+          }
+
+          // Önceki veriyi güncelle
+          previousData = dataRows;
+
+          // Verileri tabloya ekle
+          dataRows.forEach((row, i) => {
+            const ts = row.c[0].f || row.c[0].v || '-';
+            const name = row.c[1].v || '-';
+            const tr = document.createElement('tr');
             tr.innerHTML = `<td>${i + 1}</td><td>${ts}</td><td>${name}</td>`;
             tbody.appendChild(tr);
           });
         } else {
           tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Sırada kimse yok.</td></tr>`;
         }
-
-        // Mevcut listeye geç
-        previousNames = currentNames;
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error('Hata oluştu:', error);
         tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
       } finally {
         spinner.style.display = 'none';
       }
+
+      // 5 saniye sonra silinen verileri temizle
+      setTimeout(() => {
+        deletedData = []; // 5 saniye sonra silinen veriyi sıfırla
+      }, 5000);
     }
 
     window.addEventListener('load', () => {
-      requestNotificationPermission();
+      requestNotificationPermission(); // Bildirim iznini kullanıcıdan al
       refresh();
-      setInterval(refresh, 5000);
+      setInterval(refresh, 5000);  // Her 5 saniyede bir veri güncelle
     });
   </script>
 </body>
