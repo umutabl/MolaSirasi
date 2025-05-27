@@ -23,8 +23,8 @@
     .hero { background: var(--light); border-bottom: 2px solid var(--gray-md); }
     .hero .container { text-align: center; padding: 24px 0; }
     .hero h1 { font-size: 2rem; margin-bottom: 8px; }
-    .hero p { color: #555; }
-    .btn { background: var(--primary); color: var(--light); padding: 10px 20px; border-radius: 4px; text-decoration: none; font-weight: 500; transition: background .2s; }
+    .hero p { color: #555; margin-bottom: 16px; }
+    .btn { display: inline-block; background: var(--primary); color: var(--light); padding: 10px 20px; border-radius: 4px; text-decoration: none; font-weight: 500; transition: background .2s; margin-top: 8px; }
     .btn:hover { background: #001f4c; }
     .table-wrapper { background: var(--light); padding: 24px 0; }
     .table-container { position: relative; }
@@ -68,20 +68,24 @@
     // JSON endpoint için ayarlar
     const SHEET_ID   = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
     const SHEET_NAME = 'Form Responses 1';
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json&cacheBuster=${Date.now()}`;
+    const url =
+      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
 
     async function refresh() {
       const spinner = document.getElementById('spinner');
       const tbody   = document.querySelector('#molaTable tbody');
       spinner.style.display = 'block';
       try {
-        const res  = await fetch(url, { cache: 'no-store' });
-        const txt  = await res.text();
-        // JSON parse için callback öncesi ve sonrası kırpma
+        const res = await fetch(`${url}&cacheBuster=${Date.now()}`, { cache: 'no-store' });
+        const txt = await res.text();
         const json = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
         const rows = json.table.rows
           .filter(r => r.c[0] && r.c[1])
-          .map(r => ({ ts: r.c[0].v, name: r.c[1].v }));
+          .map(r => {
+            // Eğer Google tarih objesi olarak gelmişse r.c[0].f kullan
+            const ts = r.c[0].f || r.c[0].v;
+            return { ts, name: r.c[1].v };
+          });
 
         tbody.innerHTML = '';
         if (rows.length) {
