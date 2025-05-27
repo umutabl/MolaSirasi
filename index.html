@@ -221,6 +221,13 @@
             deletedData = deletedNames; // Son 5 saniyede silinen veriyi kaydet
           }
 
+          // "Mola sırası sende" mesajı, liste doluysa
+          if (dataRows.length > 0) {
+            const firstPerson = dataRows[0].c[1].v;  // İlk kişiyi al
+            const message = `${firstPerson}, Mola sırası sende!`;
+            sendNotification(message);  // Mola sırası gönderen kişiye bildirim gönder
+          }
+
           // Önceki veriyi güncelle
           previousData = dataRows;
 
