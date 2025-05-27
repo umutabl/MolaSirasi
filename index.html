@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -84,9 +84,13 @@
     .btn:hover {
       background: #001f4c;
     }
+    .error {
+      color: red;
+      text-align: center;
+      margin: 16px;
+    }
   </style>
 </head>
-
 <body>
   <header>
     <div class="logo">Turk<span>Net</span></div>
@@ -94,13 +98,14 @@
 
   <section class="hero">
     <h1>⏱ Mola Sırası</h1>
-    <p>Sıra bilgisi her <strong>1 saniyede</strong> bir güncellenir.</p>
+    <p>Sıra bilgisi her <strong>5 saniyede</strong> güncellenir.</p>
     <a href="https://forms.gle/wFexWKf69M3uJEAx5" target="_blank" class="btn">
       Katılmak için Formu Aç
     </a>
   </section>
 
   <div class="container">
+    <div id="errorMsg" class="error" style="display:none;"></div>
     <table id="molaTable">
       <thead>
         <tr>
@@ -114,53 +119,55 @@
   </div>
 
   <script>
-    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlLXd3uiQhC94TAFr8I141dhYSiLirORa9wgGYCKKDBt0pDoIa9Unw9XB3sNV1ky7zIeCY0ek5n7OB/pub?gid=1933616179&single=true&output=csv";
+    // CSV URL and auto-bust cache parameter
+    const baseCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlLXd3uiQhC94TAFr8I141dhYSiLirORa9wgGYCKKDBt0pDoIa9Unw9XB3sNV1ky7zIeCY0ek5n7OB/pub?gid=1933616179&single=true&output=csv";
 
     function parseCSV(csvText) {
-      const rows = csvText.trim().split('\n').slice(1); // Başlık hariç
-      const data = [];
-
-      for (let row of rows) {
-        const parts = row.split(',');
-        const timestamp = parts[0]?.replace(/"/g, '').trim();
-        const name = parts[1]?.replace(/"/g, '').trim();
-
-        if (timestamp && name) {
-          data.push({ timestamp, name });
-        }
-      }
-
-      return data;
+      const lines = csvText.trim().split('\n');
+      const rows = lines.slice(1);
+      const seen = new Set();
+      return rows.reduce((acc, line) => {
+        const [rawTs, rawName] = line.split(',').map(s => s.replace(/"/g,'').trim());
+        if (!rawTs || !rawName) return acc;
+        // Skip duplicates
+        const key = rawTs + '|' + rawName;
+        if (seen.has(key)) return acc;
+        seen.add(key);
+        acc.push({ timestamp: rawTs, name: rawName });
+        return acc;
+      }, []);
     }
 
-    function refreshTable() {
-      fetch(csvUrl)
-        .then(response => response.text())
-        .then(csvText => {
-          const data = parseCSV(csvText);
-          const tbody = document.querySelector('#molaTable tbody');
-
-          // Tüm satırları sil
-          while (tbody.firstChild) {
-            tbody.removeChild(tbody.firstChild);
-          }
-
+    async function refreshTable() {
+      const url = `${baseCsvUrl}&cacheBuster=${Date.now()}`;
+      try {
+        const response = await fetch(url, { cache: 'no-store' });
+        if (!response.ok) throw new Error('Sunucudan veri alınamadı');
+        const text = await response.text();
+        const data = parseCSV(text);
+        const tbody = document.querySelector('#molaTable tbody');
+        tbody.innerHTML = '';
+        if (data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Kayıt bulunamadı</td></tr>';
+        } else {
           data.forEach((row, i) => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${i + 1}</td>
-              <td>${row.timestamp}</td>
-              <td>${row.name}</td>
-            `;
+            tr.innerHTML = `<td>${i + 1}</td><td>${row.timestamp}</td><td>${row.name}</td>`;
             tbody.appendChild(tr);
           });
-        });
+        }
+        document.getElementById('errorMsg').style.display = 'none';
+      } catch (err) {
+        const errDiv = document.getElementById('errorMsg');
+        errDiv.textContent = `Hata: ${err.message}`;
+        errDiv.style.display = 'block';
+      }
     }
 
-    window.onload = () => {
+    window.addEventListener('load', () => {
       refreshTable();
-      setInterval(refreshTable, 1000); // her saniye
-    };
+      setInterval(refreshTable, 5000); // 5 saniyede bir güncelle
+    });
   </script>
 </body>
 </html>
