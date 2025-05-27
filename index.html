@@ -157,21 +157,25 @@
     let deletedData = [];   // Son 5 saniye içinde silinen öğeleri saklamak için dizi
 
     // Tarayıcı bildirimlerini almak için izin iste
-    if (Notification.permission !== "granted") {
-      Notification.requestPermission().then(permission => {
-        console.log("Bildirim izni verildi:", permission);
-      }).catch(err => {
-        console.error("Bildirim izni alınamadı:", err);
-      });
+    function requestNotificationPermission() {
+      if (Notification.permission !== "granted") {
+        Notification.requestPermission().then(permission => {
+          console.log("Bildirim izni verildi:", permission);
+        }).catch(err => {
+          console.error("Bildirim izni alınamadı:", err);
+        });
+      } else {
+        console.log("Bildirim izni zaten verilmiş.");
+      }
     }
 
     // Tarayıcı bildirim fonksiyonu
     function sendNotification(message) {
       if (Notification.permission === "granted") {
-        new Notification(message);
-        console.log("Bildirim gönderildi:", message);
+        new Notification(message);  // Bildirimi gönder
+        console.log("Bildirim gönderildi:", message);  // Bildirim gönderildiğini konsola yazdır
       } else {
-        console.log("Bildirim izni verilmedi.");
+        console.log("Bildirim izni verilmedi.");  // Bildirim izni verilmediyse
       }
     }
 
@@ -209,9 +213,9 @@
           // Silinen isimleri bul
           const deletedNames = previousNames.filter(name => !currentNames.includes(name));
           if (deletedNames.length > 0) {
-            console.log("Silinen kişi(ler):", deletedNames);
-            // Silinen kişilere "Molaya çıkabilirsin" mesajı gönder
-            sendNotification(`Molaya çıkabilirsin, silinen kişi(ler): ${deletedNames.join(', ')}`);
+            const message = `Molaya çıkabilirsin, silinen kişi(ler): ${deletedNames.join(', ')}`;
+            console.log("Silinen kişi(ler):", deletedNames);  // Konsola yazdır
+            sendNotification(message);  // Bildirim gönder
             deletedData = deletedNames; // Son 5 saniyede silinen veriyi kaydet
           }
 
@@ -241,6 +245,7 @@
     }
 
     window.addEventListener('load', () => {
+      requestNotificationPermission(); // Bildirim iznini kullanıcıdan al
       refresh();
       setInterval(refresh, 5000);  // Her 5 saniyede bir veri güncelle
     });
