@@ -5,248 +5,131 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mola Sırası</title>
   <style>
-    :root {
-      --primary: #002f6c;
-      --accent: #f9a825;
-      --light: #ffffff;
-      --gray-lt: #f5f5f5;
-      --gray-md: #e0e0e0;
-      --font: 'Helvetica Neue', Arial, sans-serif;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font);
-      background: var(--gray-lt);
-      color: var(--primary);
-    }
-    .container {
-      max-width: 960px;
-      margin: auto;
-      padding: 0 16px;
-    }
-    header {
-      background: var(--light);
-      border-bottom: 2px solid var(--gray-md);
-    }
-    header .container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 0;
-    }
-    .logo {
-      font-size: 1.4rem;
-      font-weight: bold;
-    }
-    .logo span {
-      color: var(--accent);
-    }
-    .hero {
-      background: var(--light);
-      border-bottom: 2px solid var(--gray-md);
-    }
-    .hero .container {
-      text-align: center;
-      padding: 24px 0;
-    }
-    .hero h1 {
-      font-size: 2rem;
-      margin-bottom: 8px;
-    }
-    .accent-icon {
-      color: var(--accent);
-      margin-right: 8px;
-    }
-    .hero p {
-      color: #555;
-      margin-bottom: 16px;
-    }
-    .btn {
-      display: inline-block;
-      background: var(--primary);
-      color: var(--light);
-      padding: 10px 20px;
-      border-radius: 4px;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background .2s;
-      margin-top: 8px;
-    }
-    .btn:hover {
-      background: #001f4c;
-    }
-    .table-wrapper {
-      background: var(--light);
-      padding: 24px 0;
-    }
-    .table-container {
-      position: relative;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--light);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    th, td {
-      padding: 12px;
-      text-align: left;
-    }
-    thead {
-      background: var(--primary);
-      color: var(--light);
-    }
-    tbody tr:nth-child(even) {
-      background: var(--gray-lt);
-    }
-    .spinner {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border: 4px solid var(--gray-md);
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      animation: spin 1s linear infinite;
-      display: none;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .placeholder {
-      text-align: center;
-      color: #555;
-      font-style: italic;
-      padding: 12px;
-    }
+    /* (Önceki stil tanımlamaları aynı kalıyor) */
+    :root { --primary:#002f6c;--accent:#f9a825;--light:#fff;--gray-lt:#f5f5f5;--gray-md:#e0e0e0;--font:'Helvetica Neue',Arial,sans-serif }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font);background:var(--gray-lt);color:var(--primary);}
+    .container{max-width:960px;margin:auto;padding:0 16px;}
+    header{background:var(--light);border-bottom:2px solid var(--gray-md);}
+    .hero,.table-wrapper{background:var(--light);border-bottom:2px solid var(--gray-md);}
+    .hero .container{text-align:center;padding:24px 0;}
+    .hero h1{font-size:2rem; margin-bottom:8px;}
+    .accent-icon{color:var(--accent);margin-right:8px;}
+    .hero p{color:#555;margin-bottom:16px;}
+    .btn{display:inline-block;background:var(--primary);color:var(--light);padding:10px 20px;border-radius:4px;
+         text-decoration:none;font-weight:500;transition:background .2s;margin-top:8px;}
+    .btn:hover{background:#001f4c;}
+    .table-container{position:relative;padding:24px 0;}
+    table{width:100%;border-collapse:collapse;box-shadow:0 2px 4px rgba(0,0,0,0.05);}
+    th,td{padding:12px;text-align:left;}
+    thead{background:var(--primary);color:var(--light);}
+    tbody tr:nth-child(even){background:var(--gray-lt);}
+    .spinner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+             border:4px solid var(--gray-md);border-top:4px solid var(--primary);
+             border-radius:50%;width:36px;height:36px;animation:spin 1s linear infinite;display:none;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .placeholder{text-align:center;color:#555;font-style:italic;padding:12px;}
   </style>
 </head>
 <body>
   <header>
-    <div class="container">
-      <div class="logo">Turk<span>Net</span></div>
-    </div>
+    <div class="container"><div class="logo">Turk<span>Net</span></div></div>
   </header>
+
   <section class="hero">
     <div class="container">
       <h1><span class="accent-icon">⏱</span>Mola Sırası</h1>
       <p>Sıra bilgisi her <strong>5 saniyede</strong> güncellenir.</p>
-      <a href="https://forms.gle/wFexWKf69M3uJEAx5" target="_blank" class="btn">Mola Sırasına Katıl</a>
+      <a href="https://forms.gle/wFexWKf69M3uJEAx5"
+         target="_blank"
+         class="btn">Mola Sırasına Katıl</a>
     </div>
   </section>
+
   <div class="table-wrapper">
     <div class="container table-container">
       <div class="spinner" id="spinner"></div>
       <table id="molaTable">
-        <thead>
-          <tr><th>#</th><th>Zaman Damgası</th><th>Ad Soyad</th></tr>
-        </thead>
+        <thead><tr><th>#</th><th>Zaman Damgası</th><th>Ad Soyad</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
   </div>
 
   <script>
-    const SHEET_ID = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
+    const SHEET_ID   = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
     const SHEET_NAME = 'Form Responses 1';
-    const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
+    const BASE_URL   = 
+      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?` +
+      `sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
 
-    let previousData = [];  // Önceki veriyi saklamak için dizi
+    let previousNames = [];  // Sadece önceki turdaki isimleri saklayacağız
 
-    // Bildirim iznini almak için
     function requestNotificationPermission() {
       if (Notification.permission !== "granted") {
-        Notification.requestPermission().then(permission => {
-          console.log("Bildirim izni verildi:", permission);
-        }).catch(err => {
-          console.error("Bildirim izni alınamadı:", err);
-        });
-      } else {
-        console.log("Bildirim izni zaten verilmiş.");
+        Notification.requestPermission();
       }
     }
 
-    // Tarayıcı bildirim fonksiyonu
     function sendNotification(message) {
       if (Notification.permission === "granted") {
-        // Bildirim sesi
-        const notificationSound = new Audio('https://www.soundjay.com/button/beep-07.wav');  // Ses dosyasını ekliyoruz
-        notificationSound.play();  // Ses çal
-
-        new Notification(message);  // Bildirimi gönder
-        console.log("Bildirim gönderildi:", message);  // Bildirim gönderildiğini konsola yazdır
-      } else {
-        console.log("Bildirim izni verilmedi.");  // Bildirim izni verilmediyse
+        new Audio('https://www.soundjay.com/button/beep-07.wav').play();
+        new Notification(message);
       }
     }
 
-    // 5 saniyede bir veriyi güncelleyen fonksiyon
     async function refresh() {
       const spinner = document.getElementById('spinner');
-      const tbody = document.querySelector('#molaTable tbody');
+      const tbody   = document.querySelector('#molaTable tbody');
       spinner.style.display = 'block';
 
       try {
-        const res = await fetch(`${BASE_URL}&cacheBuster=${Date.now()}`, { cache: 'no-store' });
-        const txt = await res.text();
-        const json = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
-        const rows = json.table.rows;
+        const res  = await fetch(`${BASE_URL}&cacheBuster=${Date.now()}`, {cache:'no-store'});
+        const txt  = await res.text();
+        const json = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}')+1));
+        const rows = json.table.rows || [];
 
-        const dataRows = rows.filter(row => {
-          const time = row.c?.[0]?.v;
-          const name = row.c?.[1]?.v;
-          return (
-            time &&
-            name &&
-            name.toLowerCase() !== "ad soyad" &&
-            time.toLowerCase() !== "zaman damgası"
-          );
-        });
+        // Geçerli isim listesi
+        const currentNames = rows
+          .map(r => r.c?.[1]?.v)
+          .filter(v => v && v.toLowerCase()!=='ad soyad');
 
+        // Silinen isimleri tespit et (ungrouped = önceki — şimdiki)
+        const deleted = previousNames.filter(n => !currentNames.includes(n));
+        if (deleted.length) {
+          sendNotification(`Molaya çıkabilirsin, silinen kişi(ler): ${deleted.join(', ')}`);
+        }
+
+        // Tablo gövdesini güncelle
         tbody.innerHTML = '';
-
-        if (dataRows.length > 0) {
-          // Silinen öğeleri tespit et
-          const currentNames = dataRows.map(row => row.c[1].v);  // Mevcut isimler
-          const previousNames = previousData.map(row => row.c[1].v);  // Önceki isimler
-
-          // Silinen isimleri bul
-          const deletedNames = previousNames.filter(name => !currentNames.includes(name));
-
-          // Eğer silinen kişi varsa bildirim gönder
-          if (deletedNames.length > 0) {
-            const message = `Molaya çıkabilirsin, silinen kişi(ler): ${deletedNames.join(', ')}`;
-            sendNotification(message);  // Silinen kişilere bildirim gönder
-          }
-
-          // Önceki veriyi güncelle
-          previousData = dataRows;
-
-          // Verileri tabloya ekle
-          dataRows.forEach((row, i) => {
-            const ts = row.c[0].f || row.c[0].v || '-';
-            const name = row.c[1].v || '-';
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${i + 1}</td><td>${ts}</td><td>${name}</td>`;
+        if (currentNames.length) {
+          rows.forEach((r,i) => {
+            const ts   = r.c[0].f || r.c[0].v || '-';
+            const name = r.c[1].v || '-';
+            const tr   = document.createElement('tr');
+            tr.innerHTML = `<td>${i+1}</td><td>${ts}</td><td>${name}</td>`;
             tbody.appendChild(tr);
           });
         } else {
-          tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Sırada kimse yok.</td></tr>`;
+          tbody.innerHTML = 
+            `<tr><td colspan="3" class="placeholder">Sırada kimse yok.</td></tr>`;
         }
-      } catch (error) {
-        console.error('Hata oluştu:', error);
-        tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
+
+        // Şimdiki ismi kaydet, sonraki tura bu gelcek
+        previousNames = currentNames;
+      } catch (e) {
+        console.error(e);
+        tbody.innerHTML = 
+          `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
       } finally {
         spinner.style.display = 'none';
       }
     }
 
     window.addEventListener('load', () => {
-      requestNotificationPermission(); // Bildirim iznini kullanıcıdan al
+      requestNotificationPermission();
       refresh();
-      setInterval(refresh, 5000);  // Her 5 saniyede bir veri güncelle
+      setInterval(refresh, 5000);
     });
   </script>
 </body>
