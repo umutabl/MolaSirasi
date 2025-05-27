@@ -23,6 +23,7 @@
     .hero { background: var(--light); border-bottom: 2px solid var(--gray-md); }
     .hero .container { text-align: center; padding: 24px 0; }
     .hero h1 { font-size: 2rem; margin-bottom: 8px; }
+    .accent-icon { color: var(--accent); margin-right: 8px; }
     .hero p { color: #555; margin-bottom: 16px; }
     .btn { display: inline-block; background: var(--primary); color: var(--light); padding: 10px 20px; border-radius: 4px; text-decoration: none; font-weight: 500; transition: background .2s; margin-top: 8px; }
     .btn:hover { background: #001f4c; }
@@ -46,9 +47,9 @@
 
   <section class="hero">
     <div class="container">
-      <h1>⏱ Mola Sırası</h1>
+      <h1><span class="accent-icon">⏱</span>Mola Sırası</h1>
       <p>Sıra bilgisi her <strong>5 saniyede</strong> güncellenir.</p>
-      <a href="https://forms.gle/wFexWKf69M3uJEAx5" target="_blank" class="btn">Katılmak için Formu Aç</a>
+      <a href="https://forms.gle/wFexWKf69M3uJEAx5" target="_blank" class="btn">Mola Sırasına Katıl</a>
     </div>
   </section>
 
@@ -82,7 +83,6 @@
         const rows = json.table.rows
           .filter(r => r.c[0] && r.c[1])
           .map(r => {
-            // Eğer Google tarih objesi olarak gelmişse r.c[0].f kullan
             const ts = r.c[0].f || r.c[0].v;
             return { ts, name: r.c[1].v };
           });
@@ -96,7 +96,7 @@
           });
         } else {
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td colspan="3" class="placeholder">Şu an kimse sırada değil.</td>`;
+          tr.innerHTML = `<td colspan="3" class="placeholder">Sırada kimse yok.</td>`;
           tbody.appendChild(tr);
         }
       } catch (e) {
