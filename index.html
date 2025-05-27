@@ -154,7 +154,6 @@
     const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
 
     let previousData = [];  // Önceki veriyi saklamak için dizi
-    let deletedData = [];   // Son 5 saniye içinde silinen öğeleri saklamak için dizi
 
     // Bildirim iznini almak için
     function requestNotificationPermission() {
@@ -218,9 +217,8 @@
 
           // Eğer silinen kişi varsa bildirim gönder
           if (deletedNames.length > 0) {
-            const message = `Molaya çıkabilirsin, ${deletedNames.join(', ')}`;
+            const message = `Molaya çıkabilirsin, silinen kişi(ler): ${deletedNames.join(', ')}`;
             sendNotification(message);  // Silinen kişilere bildirim gönder
-            deletedData = deletedNames; // Son 5 saniyede silinen veriyi kaydet
           }
 
           // Önceki veriyi güncelle
@@ -243,11 +241,6 @@
       } finally {
         spinner.style.display = 'none';
       }
-
-      // 5 saniye sonra silinen verileri temizle
-      setTimeout(() => {
-        deletedData = []; // 5 saniye sonra silinen veriyi sıfırla
-      }, 5000);
     }
 
     window.addEventListener('load', () => {
