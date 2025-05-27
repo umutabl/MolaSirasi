@@ -116,35 +116,39 @@
   <script>
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlLXd3uiQhC94TAFr8I141dhYSiLirORa9wgGYCKKDBt0pDoIa9Unw9XB3sNV1ky7zIeCY0ek5n7OB/pub?gid=1933616179&single=true&output=csv";
 
-    function parseCSV(data) {
-      const lines = data.trim().split('\n');
-      const result = [];
+    function parseCSV(csvText) {
+      const rows = csvText.trim().split('\n').slice(1); // Başlık hariç
+      const data = [];
 
-      for (let i = 1; i < lines.length; i++) {
-        const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // virgülleri dikkatli ayır
-        const timestamp = row[0]?.replace(/"/g, '').trim();
-        const name = row[1]?.replace(/"/g, '').trim();
+      for (let row of rows) {
+        const parts = row.split(',');
+        const timestamp = parts[0]?.replace(/"/g, '').trim();
+        const name = parts[1]?.replace(/"/g, '').trim();
 
         if (timestamp && name) {
-          result.push({ timestamp, name });
+          data.push({ timestamp, name });
         }
       }
 
-      return result;
+      return data;
     }
 
     function refreshTable() {
       fetch(csvUrl)
         .then(response => response.text())
-        .then(data => {
-          const rows = parseCSV(data);
+        .then(csvText => {
+          const data = parseCSV(csvText);
           const tbody = document.querySelector('#molaTable tbody');
-          tbody.innerHTML = '';
 
-          rows.forEach((row, index) => {
+          // Tüm satırları sil
+          while (tbody.firstChild) {
+            tbody.removeChild(tbody.firstChild);
+          }
+
+          data.forEach((row, i) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-              <td>${index + 1}</td>
+              <td>${i + 1}</td>
               <td>${row.timestamp}</td>
               <td>${row.name}</td>
             `;
@@ -155,7 +159,7 @@
 
     window.onload = () => {
       refreshTable();
-      setInterval(refreshTable, 1000); // 1 saniyede bir güncelle
+      setInterval(refreshTable, 1000); // her saniye
     };
   </script>
 </body>
