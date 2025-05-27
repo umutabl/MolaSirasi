@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mola Sırası</title>
   <style>
     :root {
@@ -13,11 +13,7 @@
       --gray-md: #e0e0e0;
       --font: 'Helvetica Neue', Arial, sans-serif;
     }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: var(--font);
       background: var(--gray-lt);
@@ -73,7 +69,7 @@
       border-radius: 4px;
       text-decoration: none;
       font-weight: 500;
-      transition: background 0.2s;
+      transition: background .2s;
       margin-top: 8px;
     }
     .btn:hover {
@@ -90,7 +86,7 @@
       width: 100%;
       border-collapse: collapse;
       background: var(--light);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     th, td {
       padding: 12px;
@@ -117,9 +113,7 @@
       display: none;
     }
     @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
+      to { transform: rotate(360deg); }
     }
     .placeholder {
       text-align: center;
@@ -135,7 +129,6 @@
       <div class="logo">Turk<span>Net</span></div>
     </div>
   </header>
-
   <section class="hero">
     <div class="container">
       <h1><span class="accent-icon">⏱</span>Mola Sırası</h1>
@@ -143,7 +136,6 @@
       <a href="https://forms.gle/wFexWKf69M3uJEAx5" target="_blank" class="btn">Mola Sırasına Katıl</a>
     </div>
   </section>
-
   <div class="table-wrapper">
     <div class="container table-container">
       <div class="spinner" id="spinner"></div>
@@ -155,7 +147,6 @@
       </table>
     </div>
   </div>
-
   <script>
     const SHEET_ID = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
     const SHEET_NAME = 'Form Responses 1';
@@ -172,11 +163,20 @@
         const json = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
         const rows = json.table.rows;
 
-        const dataRows = rows.filter(r => r.c && r.c.length >= 2 && r.c[0] && r.c[1]);
+        const dataRows = rows.filter(row => {
+          const time = row.c?.[0]?.v;
+          const name = row.c?.[1]?.v;
+          return (
+            time &&
+            name &&
+            name.toLowerCase() !== "ad soyad" &&
+            time.toLowerCase() !== "zaman damgası"
+          );
+        });
 
         tbody.innerHTML = '';
 
-        if (!dataRows.length) {
+        if (dataRows.length === 0) {
           tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Sırada kimse yok.</td></tr>`;
         } else {
           dataRows.forEach((row, i) => {
@@ -187,8 +187,9 @@
             tbody.appendChild(tr);
           });
         }
-      } catch (err) {
-        console.error('Veri alınamadı:', err);
+      } catch (error) {
+        console.error('Hata oluştu:', error);
+        tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
       } finally {
         spinner.style.display = 'none';
       }
