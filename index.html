@@ -155,6 +155,8 @@
 
     let previousData = [];  // Önceki veriyi saklamak için dizi
     let deletedData = [];   // Son 5 saniye içinde silinen öğeleri saklamak için dizi
+    let noOneNotified = false;  // "Kimse listede değil" bildirimi yalnızca bir kez göndermek için kontrol
+    let firstNotificationSent = false;  // İlk kişiye mola sırası bildirimi yalnızca bir kez göndermek için kontrol
 
     // Bildirim iznini almak için
     function requestNotificationPermission() {
@@ -172,6 +174,10 @@
     // Tarayıcı bildirim fonksiyonu
     function sendNotification(message) {
       if (Notification.permission === "granted") {
+        // Bildirim sesi
+        const notificationSound = new Audio('https://www.soundjay.com/button/beep-07.wav');  // Ses dosyasını ekliyoruz
+        notificationSound.play();  // Ses çal
+
         new Notification(message);  // Bildirimi gönder
         console.log("Bildirim gönderildi:", message);  // Bildirim gönderildiğini konsola yazdır
       } else {
@@ -206,8 +212,12 @@
 
         if (dataRows.length === 0) {
           tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Sırada kimse yok.</td></tr>`;
-          // Liste boşsa bildirim gönder
-          sendNotification("Kimse listede değil. Mola zamanı!");
+
+          // Kimse listede değilse yalnızca bir kez bildirim gönder
+          if (!noOneNotified) {
+            sendNotification("Kimse listede değil. Mola zamanı!");
+            noOneNotified = true;  // Bildirimi yalnızca bir kez göndermeyi sağla
+          }
         } else {
           // Silinen öğeleri tespit et
           const currentNames = dataRows.map(row => row.c[1].v);  // Mevcut isimler
@@ -222,10 +232,11 @@
           }
 
           // "Mola sırası sende" mesajı, liste doluysa
-          if (dataRows.length > 0) {
+          if (dataRows.length > 0 && !firstNotificationSent) {
             const firstPerson = dataRows[0].c[1].v;  // İlk kişiyi al
             const message = `${firstPerson}, Mola sırası sende!`;
             sendNotification(message);  // Mola sırası gönderen kişiye bildirim gönder
+            firstNotificationSent = true;  // İlk kişiye bildirim gönderildi, tekrar gönderme
           }
 
           // Önceki veriyi güncelle
