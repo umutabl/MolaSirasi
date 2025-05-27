@@ -14,159 +14,107 @@
       --font:    'Helvetica Neue', Arial, sans-serif;
     }
     * { box-sizing: border-box; margin:0; padding:0; }
-    body {
-      font-family: var(--font);
-      background: var(--gray-lt);
-      color: var(--primary);
-      line-height: 1.5;
+    body { font-family: var(--font); background: var(--gray-lt); color: var(--primary); line-height: 1.5; }
+    header { background: var(--light); border-bottom: 2px solid var(--gray-md); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
+    .logo span { color: var(--accent); }
+    .hero { background: var(--light); padding: 24px; text-align: center; border-bottom: 2px solid var(--gray-md); }
+    .hero h1 { font-size: 2rem; margin-bottom: 8px; }
+    .hero p { color: #555; }
+    .container { max-width: 960px; margin: 24px auto; padding: 0 16px; position: relative; }
+    table { width: 100%; border-collapse: collapse; background: var(--light); box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: opacity .3s ease; }
+    th, td { padding: 12px; text-align: left; }
+    thead { background: var(--primary); color: var(--light); }
+    tbody tr:nth-child(even) { background: var(--gray-lt); }
+    .btn { display: inline-block; padding: 10px 20px; background: var(--primary); color: var(--light); text-decoration: none; border-radius: 4px; font-weight: 500; transition: background .2s; }
+    .btn:hover { background: #001f4c; }
+    .spinner {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      border: 4px solid var(--gray-md); border-top: 4px solid var(--primary);
+      border-radius: 50%; width: 40px; height: 40px;
+      animation: spin 1s linear infinite;
+      display: none;
     }
-    header {
-      background: var(--light);
-      border-bottom: 2px solid var(--gray-md);
-      padding: 12px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    header .logo {
-      font-size: 1.4rem;
-      font-weight: bold;
-      color: var(--primary);
-    }
-    header .logo span {
-      color: var(--accent);
-    }
-    .hero {
-      background: var(--light);
-      padding: 24px;
-      text-align: center;
-      border-bottom: 2px solid var(--gray-md);
-    }
-    .hero h1 {
-      font-size: 2rem;
-      margin-bottom: 8px;
-    }
-    .hero p {
-      color: #555;
-    }
-    .container {
-      max-width: 960px;
-      margin: 24px auto;
-      padding: 0 16px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--light);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    th, td {
-      padding: 12px;
-      text-align: left;
-    }
-    thead {
-      background: var(--primary);
-      color: var(--light);
-    }
-    tbody tr:nth-child(even) {
-      background: var(--gray-lt);
-    }
-    .btn {
-      display: inline-block;
-      padding: 10px 20px;
-      background: var(--primary);
-      color: var(--light);
-      text-decoration: none;
-      border-radius: 4px;
-      font-weight: 500;
-      transition: background .2s;
-    }
-    .btn:hover {
-      background: #001f4c;
-    }
-    .error {
-      color: red;
-      text-align: center;
-      margin: 16px;
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .fade-in { animation: fadeIn 0.5s ease; }
+    .fade-out { animation: fadeOut 0.5s ease forwards; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; height: 0; padding: 0; margin: 0; } }
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">Turk<span>Net</span></div>
-  </header>
-
+  <header><div class="logo">Turk<span>Net</span></div></header>
   <section class="hero">
     <h1>⏱ Mola Sırası</h1>
     <p>Sıra bilgisi her <strong>5 saniyede</strong> güncellenir.</p>
-    <a href="https://forms.gle/wFexWKf69M3uJEAx5" target="_blank" class="btn">
-      Katılmak için Formu Aç
-    </a>
+    <a href="https://forms.gle/wFexWKf69M3uJEAx5" target="_blank" class="btn">Katılmak için Formu Aç</a>
   </section>
 
   <div class="container">
-    <div id="errorMsg" class="error" style="display:none;"></div>
+    <div class="spinner" id="spinner"></div>
     <table id="molaTable">
       <thead>
-        <tr>
-          <th>#</th>
-          <th>Zaman Damgası</th>
-          <th>Ad Soyad</th>
-        </tr>
+        <tr><th>#</th><th>Zaman Damgası</th><th>Ad Soyad</th></tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
 
   <script>
-    // CSV URL and auto-bust cache parameter
     const baseCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlLXd3uiQhC94TAFr8I141dhYSiLirORa9wgGYCKKDBt0pDoIa9Unw9XB3sNV1ky7zIeCY0ek5n7OB/pub?gid=1933616179&single=true&output=csv";
+    let prevData = [];
 
-    function parseCSV(csvText) {
-      const lines = csvText.trim().split('\n');
-      const rows = lines.slice(1);
+    function parseCSV(text) {
+      const lines = text.trim().split('\n').slice(1);
       const seen = new Set();
-      return rows.reduce((acc, line) => {
-        const [rawTs, rawName] = line.split(',').map(s => s.replace(/"/g,'').trim());
-        if (!rawTs || !rawName) return acc;
-        // Skip duplicates
-        const key = rawTs + '|' + rawName;
-        if (seen.has(key)) return acc;
+      return lines.reduce((arr, line) => {
+        const [ts, name] = line.split(',').map(s => s.replace(/"/g,'').trim());
+        if (!ts||!name) return arr;
+        const key = ts + '|' + name;
+        if (seen.has(key)) return arr;
         seen.add(key);
-        acc.push({ timestamp: rawTs, name: rawName });
-        return acc;
+        arr.push({ ts, name });
+        return arr;
       }, []);
     }
 
     async function refreshTable() {
-      const url = `${baseCsvUrl}&cacheBuster=${Date.now()}`;
+      const spinner = document.getElementById('spinner');
+      const table = document.getElementById('molaTable');
+      spinner.style.display = 'block'; table.style.opacity = '0.5';
       try {
-        const response = await fetch(url, { cache: 'no-store' });
-        if (!response.ok) throw new Error('Sunucudan veri alınamadı');
-        const text = await response.text();
+        const res = await fetch(`${baseCsvUrl}&_cb=${Date.now()}`, { cache: 'no-store' });
+        const text = await res.text();
         const data = parseCSV(text);
-        const tbody = document.querySelector('#molaTable tbody');
-        tbody.innerHTML = '';
-        if (data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Kayıt bulunamadı</td></tr>';
-        } else {
+        // If data identical, skip DOM update
+        if (JSON.stringify(data) !== JSON.stringify(prevData)) {
+          const tbody = table.querySelector('tbody');
+          // Fade out removed rows
+          prevData.forEach((old, i) => {
+            if (!data.find(d=>d.ts===old.ts && d.name===old.name)) {
+              const row = tbody.children[i]; if(row) row.classList.add('fade-out');
+            }
+          });
+          // Clear all after transition frame
+          setTimeout(() => tbody.innerHTML = '', 500);
+          // Add new rows
           data.forEach((row, i) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${i + 1}</td><td>${row.timestamp}</td><td>${row.name}</td>`;
+            const tr = document.createElement('tr'); tr.classList.add('fade-in');
+            tr.innerHTML = `<td>${i+1}</td><td>${row.ts}</td><td>${row.name}</td>`;
             tbody.appendChild(tr);
           });
+          prevData = data;
         }
-        document.getElementById('errorMsg').style.display = 'none';
-      } catch (err) {
-        const errDiv = document.getElementById('errorMsg');
-        errDiv.textContent = `Hata: ${err.message}`;
-        errDiv.style.display = 'block';
+      } catch (e) {
+        console.error(e);
+      } finally {
+        spinner.style.display = 'none'; table.style.opacity = '1';
       }
     }
 
     window.addEventListener('load', () => {
       refreshTable();
-      setInterval(refreshTable, 5000); // 5 saniyede bir güncelle
+      setInterval(refreshTable, 5000);
     });
   </script>
 </body>
