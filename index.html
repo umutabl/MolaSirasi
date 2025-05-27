@@ -59,15 +59,15 @@
         const res = await fetch(`${BASE_URL}&cacheBuster=${Date.now()}`, {cache:'no-store'});
         const txt = await res.text();
         const json = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}')+1));
-        const rows = json.table.rows.filter(r=> r.c[1] && r.c[1].v);
+        // İlk satır (başlık) atlanıyor
+        const allRows = json.table.rows.slice(1);
+        const dataRows = allRows.filter(r => r.c[1] && r.c[1].v);
 
-        // Tablonun kendi satır sayısını rows.length kadar ayarla
         tbody.innerHTML = '';
-        if (!rows.length) {
-          // Boşsa placeholder göster
+        if (!dataRows.length) {
           tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Sırada kimse yok.</td></tr>`;
         } else {
-          rows.forEach((row, i) => {
+          dataRows.forEach((row, i) => {
             const ts = row.c[0].f || row.c[0].v;
             const name = row.c[1].v;
             const tr = document.createElement('tr');
