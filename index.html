@@ -155,6 +155,18 @@
     let previousData = [];  // Önceki veriyi saklamak için dizi
     let deletedData = [];   // Son 5 saniye içinde silinen öğeleri saklamak için dizi
 
+    // Tarayıcı bildirimlerini almak için izin iste
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+
+    // Tarayıcı bildirim fonksiyonu
+    function sendNotification(message) {
+      if (Notification.permission === "granted") {
+        new Notification(message);
+      }
+    }
+
     async function refresh() {
       const spinner = document.getElementById('spinner');
       const tbody = document.querySelector('#molaTable tbody');
@@ -189,8 +201,8 @@
           // Silinen isimleri bul
           const deletedNames = previousNames.filter(name => !currentNames.includes(name));
           if (deletedNames.length > 0) {
-            // Silinen kişileri bildirim olarak göster
-            alert(`Silinen kişi(ler): ${deletedNames.join(', ')}`);
+            // Silinen kişilere "Molaya çıkabilirsin" mesajı gönder
+            sendNotification(`Molaya çıkabilirsin, silinen kişi(ler): ${deletedNames.join(', ')}`);
             deletedData = deletedNames; // Son 5 saniyede silinen veriyi kaydet
           }
 
