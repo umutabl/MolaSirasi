@@ -15,6 +15,9 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
       font-family: var(--font);
       background: var(--gray-lt);
       color: var(--primary);
@@ -42,7 +45,7 @@
       font-weight: 500; transition: background .2s; margin-top: 8px;
     }
     .btn:hover { background: #001f4c; }
-    .table-wrapper { background: var(--light); padding: 24px 0; }
+    .table-wrapper { background: var(--light); padding: 24px 0; flex: 1; }
     .table-container { position: relative; }
     table {
       width: 100%; border-collapse: collapse; background: var(--light);
@@ -62,6 +65,14 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .placeholder {
       text-align: center; color: #555; font-style: italic; padding: 12px;
+    }
+    footer {
+      background: var(--light);
+      border-top: 2px solid var(--gray-md);
+      text-align: center;
+      padding: 12px 0;
+      color: #555;
+      font-size: 0.9rem;
     }
   </style>
 </head>
@@ -94,7 +105,10 @@
     </div>
   </div>
 
-  <!-- JS'i defer ile yükleyelim -->
+  <footer>
+    &copy; 2025 Geliştiriciler: Ahmet Can İnceoğlu ve Umut Ablay
+  </footer>
+
   <script defer>
     console.log("JS yüklendi ve çalışıyor.");
 
@@ -104,11 +118,9 @@
       `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`
       + `?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
 
-    let previousData = [];
     let previousFirst = null;
 
     function requestNotificationPermission() {
-      // API var mı kontrol et
       if (!("Notification" in window)) {
         console.log("Notification API desteklenmiyor.");
         return;
@@ -127,7 +139,7 @@
       const sound = new Audio(
         'https://www.soundjay.com/button/beep-07.wav'
       );
-      sound.play().catch(()=>{/* sesi çalamadıysa atla */});
+      sound.play().catch(()=>{/* atla */});
       new Notification(message);
     }
 
@@ -175,10 +187,7 @@
             `<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
         }
 
-        // Sonraki adım için sakla
         previousFirst = dataRows[0]?.c[1]?.v || null;
-        previousData  = dataRows;
-
       } catch (err) {
         console.error("Veri yüklenirken hata:", err);
         tbody.innerHTML =
