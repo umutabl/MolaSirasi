@@ -10,7 +10,6 @@
       --light: #fff;
       --font: 'Helvetica Neue', Arial, sans-serif;
       --diameter: 35vmax;
-      --footer-height: 60px;
     }
     * {
       box-sizing: border-box;
@@ -25,11 +24,11 @@
       color: var(--primary);
       background: #000;
       position: relative;
-      padding-bottom: var(--footer-height); /* Footer için boşluk */
+      padding-bottom: 100px; /* Footer yüksekliği kadar boşluk */
       overflow-x: hidden;
     }
 
-    /* Aurora efekt */
+    /* Aurora effect overlay */
     .aurora {
       position: fixed;
       inset: 0;
@@ -58,21 +57,21 @@
       100% { filter: hue-rotate(360deg); }
     }
     @keyframes move1 {
-      0% { top: 0; left: 50vw; }
-      25% { left: 0; }
-      50% { top: 100vh; }
-      75% { left: 100vw; }
-      100% { top: 0; left: 50vw; }
+      0%   { top: 0vh; left: 50vw; }
+      25%  { left: 0vw; }
+      50%  { top: 100vh; }
+      75%  { left: 100vw; }
+      100% { top: 0vh; left: 50vw; }
     }
     @keyframes move2 {
-      0% { top: 50vh; left: 100vw; }
-      25% { top: 100vh; }
-      50% { left: 0; }
-      75% { top: 0; }
+      0%   { top: 50vh; left: 100vw; }
+      25%  { top: 100vh; }
+      50%  { left: 0vw; }
+      75%  { top: 0vh; }
       100% { top: 50vh; left: 100vw; }
     }
 
-    /* Mevcut stil */
+    /* Existing styles */
     #background-gradient-canvas {
       position: fixed;
       inset: 0;
@@ -85,7 +84,7 @@
       top: 0;
       z-index: 10;
       backdrop-filter: blur(10px);
-      border-bottom: 2px solid rgba(0,0,0,0.1);
+      border-bottom: 2px solid rgba(0, 0, 0, 0.1);
     }
     .container {
       max-width: 960px;
@@ -122,23 +121,20 @@
       text-decoration: none;
       font-weight: 500;
       transition: transform 0.2s;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       font-size: 1.1rem;
     }
-    .btn:hover {
-      transform: translateY(-3px);
-    }
+    .btn:hover { transform: translateY(-3px); }
     .table-wrapper {
       padding: 24px 16px;
       max-width: 960px;
       margin: auto;
-      margin-bottom: var(--footer-height);
     }
     table {
       width: 100%;
       border-collapse: collapse;
       background: var(--light);
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       border-radius: 8px;
       overflow: hidden;
     }
@@ -152,9 +148,7 @@
       font-size: 1.1rem;
       font-weight: bold;
     }
-    tbody tr:nth-child(even) {
-      background: #f5f5f5;
-    }
+    tbody tr:nth-child(even) { background: #f5f5f5; }
     .placeholder {
       text-align: center;
       color: #555;
@@ -176,22 +170,21 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     footer {
-      position: fixed;
       bottom: 0;
       left: 0;
       width: 100%;
-      height: var(--footer-height);
       backdrop-filter: blur(10px);
-      border-top: 2px solid rgba(255,255,255,0.1);
+      border-top: 2px solid rgba(255, 255, 255, 0.1);
       text-align: center;
-      line-height: var(--footer-height);
+      padding: 12px 0;
       font-size: 14px;
       color: white;
       font-weight: bold;
-      z-index: 20;
+      z-index: 10;
     }
     footer .developer-names {
       font-size: 12px;
+      color: white;
     }
     @media (max-width: 768px) {
       .hero h1 { font-size: 1.8rem; }
@@ -201,6 +194,7 @@
 </head>
 <body>
   <canvas id="background-gradient-canvas"></canvas>
+  <!-- Aurora overlay -->
   <div class="aurora"></div>
 
   <header>
@@ -220,8 +214,12 @@
   <div class="table-wrapper">
     <div class="spinner" id="spinner"></div>
     <table id="molaTable">
-      <thead><tr><th>#</th><th>Zaman Damgası</th><th>Ad Soyad</th></tr></thead>
-      <tbody><tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr></tbody>
+      <thead>
+        <tr><th>#</th><th>Zaman Damgası</th><th>Ad Soyad</th></tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>
+      </tbody>
     </table>
   </div>
 
@@ -229,13 +227,36 @@
     <p class="developer-names">© 2025 Geliştiriciler: Ahmet Can İnceoğlu ve Umut Ablay</p>
   </footer>
 
-  <script defer>
-    console.log("JS yüklendi ve çalışıyor.");
+  <script>
+    const canvas = document.getElementById('background-gradient-canvas');
+    const ctx = canvas.getContext('2d');
+    const colors = ['#002f6c', '#F9A825'];
+    let w, h, angle = 0;
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    function draw() {
+      const grd = ctx.createLinearGradient(
+        w * Math.cos(angle), h * Math.sin(angle),
+        w * Math.cos(angle + Math.PI), h * Math.sin(angle + Math.PI)
+      );
+      colors.forEach((color, i) => grd.addColorStop(i / (colors.length - 1), color));
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, w, h);
+    }
+    function animate() {
+      angle += 0.002;
+      draw();
+      requestAnimationFrame(animate);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+    animate();
 
-    const SHEET_ID   = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
+    const SHEET_ID = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
     const SHEET_NAME = 'Form Responses 1';
-    const BASE_URL   = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
-
+    const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
     let previousFirst = null;
 
     function requestNotificationPermission() {
@@ -249,27 +270,24 @@
 
     async function refresh() {
       const spinner = document.getElementById('spinner');
-      const tbody   = document.querySelector('#molaTable tbody');
+      const tbody = document.querySelector('#molaTable tbody');
       spinner.style.display = 'block';
       try {
         const res = await fetch(`${BASE_URL}&cacheBuster=${Date.now()}`, { cache: 'no-store' });
         const txt = await res.text();
         const json = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
         const rows = json.table.rows || [];
-        const dataRows = rows.filter(r => r.c[0]?.v && r.c[1]?.v && r.c[1].v.toLowerCase() !== 'ad soyad');
-        tbody.innerHTML = '';
-        const names = dataRows.map(r => r.c[1].v);
-        if (previousFirst && !names.includes(previousFirst)) sendNotification(`${previousFirst}, mola sırası sende!`);
-        if (dataRows.length) {
-          dataRows.forEach((r,i) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${i+1}</td><td>${r.c[0].f||r.c[0].v||'-'}</td><td>${r.c[1].v}</td>`;
-            tbody.appendChild(tr);
-          });
-        } else {
-          tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
+        const data = rows.filter(r => r.c[0]?.v && r.c[1]?.v && r.c[1].v.toLowerCase() !== 'ad soyad');
+        const names = data.map(r => r.c[1].v);
+        if (previousFirst && !names.includes(previousFirst)) {
+          sendNotification(`${previousFirst}, mola sırası sende!`);
         }
-        previousFirst = dataRows[0]?.c[1]?.v || null;
+        tbody.innerHTML = data.length
+          ? data.map((r, i) =>
+              `<tr><td>${i + 1}</td><td>${r.c[0].f || r.c[0].v || '-}</td><td>${r.c[1].v}</td></tr>`
+            ).join('')
+          : `<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
+        previousFirst = data[0]?.c[1]?.v || null;
       } catch {
         tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
       } finally {
@@ -277,7 +295,11 @@
       }
     }
 
-    window.addEventListener('load', () => { requestNotificationPermission(); refresh(); setInterval(refresh, 5000); });
+    window.addEventListener('load', () => {
+      requestNotificationPermission();
+      refresh();
+      setInterval(refresh, 5000);
+    });
   </script>
 </body>
 </html>
