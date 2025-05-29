@@ -11,20 +11,14 @@
       --font: 'Helvetica Neue', Arial, sans-serif;
       --diameter: 35vmax;
     }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    html, body {
-      height: 100%;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
     body {
       font-family: var(--font);
       color: var(--primary);
       background: #000;
       position: relative;
-      padding-bottom: 100px; /* Footer yüksekliği kadar boşluk */
+      padding-bottom: 100px;
       overflow-x: hidden;
     }
 
@@ -35,8 +29,7 @@
       z-index: -2;
       background: transparent;
     }
-    .aurora::before,
-    .aurora::after {
+    .aurora::before, .aurora::after {
       content: '';
       position: absolute;
       width: 1px;
@@ -52,22 +45,19 @@
       box-shadow: 0 0 var(--diameter) var(--diameter) cyan;
       animation: hue 10s linear infinite, move2 20s linear infinite;
     }
-    @keyframes hue {
-      0% { filter: hue-rotate(0deg); }
-      100% { filter: hue-rotate(360deg); }
-    }
+    @keyframes hue { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
     @keyframes move1 {
-      0%   { top: 0vh; left: 50vw; }
-      25%  { left: 0vw; }
-      50%  { top: 100vh; }
-      75%  { left: 100vw; }
+      0% { top: 0vh; left: 50vw; }
+      25% { left: 0vw; }
+      50% { top: 100vh; }
+      75% { left: 100vw; }
       100% { top: 0vh; left: 50vw; }
     }
     @keyframes move2 {
-      0%   { top: 50vh; left: 100vw; }
-      25%  { top: 100vh; }
-      50%  { left: 0vw; }
-      75%  { top: 0vh; }
+      0% { top: 50vh; left: 100vw; }
+      25% { top: 100vh; }
+      50% { left: 0vw; }
+      75% { top: 0vh; }
       100% { top: 50vh; left: 100vw; }
     }
 
@@ -80,38 +70,16 @@
       z-index: -3;
     }
     header {
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      position: sticky; top: 0; z-index: 10;
       backdrop-filter: blur(10px);
       border-bottom: 2px solid rgba(0, 0, 0, 0.1);
     }
-    .container {
-      max-width: 960px;
-      margin: auto;
-      padding: 12px 16px;
-    }
-    .logo {
-      font-size: 1.4rem;
-      font-weight: bold;
-      color: var(--primary);
-    }
-    .logo span {
-      color: #f9a825;
-    }
-    .hero {
-      padding: 60px 16px;
-      text-align: center;
-      color: var(--light);
-    }
-    .hero h1 {
-      font-size: 2.2rem;
-      margin-bottom: 12px;
-    }
-    .hero p {
-      font-size: 1rem;
-      margin-bottom: 20px;
-    }
+    .container { max-width: 960px; margin: auto; padding: 12px 16px; }
+    .logo { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
+    .logo span { color: #f9a825; }
+    .hero { padding: 60px 16px; text-align: center; color: var(--light); }
+    .hero h1 { font-size: 2.2rem; margin-bottom: 12px; }
+    .hero p { font-size: 1rem; margin-bottom: 20px; }
     .btn {
       display: inline-block;
       background: var(--primary);
@@ -125,68 +93,31 @@
       font-size: 1.1rem;
     }
     .btn:hover { transform: translateY(-3px); }
-    .table-wrapper {
-      padding: 24px 16px;
-      max-width: 960px;
-      margin: auto;
-    }
+    .table-wrapper { padding: 24px 16px; max-width: 960px; margin: auto; }
     table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--light);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      overflow: hidden;
+      width: 100%; border-collapse: collapse;
+      background: var(--light); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 8px; overflow: hidden;
     }
-    th, td {
-      padding: 14px;
-      text-align: left;
-    }
-    thead {
-      background: var(--primary);
-      color: var(--light);
-      font-size: 1.1rem;
-      font-weight: bold;
-    }
+    th, td { padding: 14px; text-align: left; }
+    thead { background: var(--primary); color: var(--light); font-size: 1.1rem; font-weight: bold; }
     tbody tr:nth-child(even) { background: #f5f5f5; }
-    .placeholder {
-      text-align: center;
-      color: #555;
-      font-style: italic;
-      padding: 12px;
-    }
+    .placeholder { text-align: center; color: #555; font-style: italic; padding: 12px; }
     .spinner {
-      position: absolute;
-      top: 50%;
-      left: 50%;
+      position: absolute; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      border: 4px solid #e0e0e0;
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      animation: spin 1s linear infinite;
-      display: none;
+      border: 4px solid #e0e0e0; border-top: 4px solid var(--primary);
+      border-radius: 50%; width: 36px; height: 36px;
+      animation: spin 1s linear infinite; display: none;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      backdrop-filter: blur(10px);
-      border-top: 2px solid rgba(255, 255, 255, 0.1);
-      text-align: center;
-      padding: 12px 0;
-      font-size: 14px;
-      color: white;
-      font-weight: bold;
-      z-index: 10;
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      backdrop-filter: blur(10px); border-top: 2px solid rgba(255, 255, 255, 0.1);
+      text-align: center; padding: 12px 0; font-size: 14px;
+      color: white; font-weight: bold; z-index: 10;
     }
-    footer .developer-names {
-      font-size: 12px;
-      color: white;
-    }
+    footer .developer-names { font-size: 12px; color: white; }
     @media (max-width: 768px) {
       .hero h1 { font-size: 1.8rem; }
       .btn { font-size: 1rem; padding: 10px 22px; }
@@ -195,7 +126,6 @@
 </head>
 <body>
   <canvas id="background-gradient-canvas"></canvas>
-  <!-- Aurora overlay -->
   <div class="aurora"></div>
 
   <header>
@@ -233,10 +163,7 @@
     const ctx = canvas.getContext('2d');
     const colors = ['#002f6c', '#F9A825'];
     let w, h, angle = 0;
-    function resize() {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-    }
+    function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
     function draw() {
       const grd = ctx.createLinearGradient(
         w * Math.cos(angle), h * Math.sin(angle),
@@ -246,14 +173,8 @@
       ctx.fillStyle = grd;
       ctx.fillRect(0, 0, w, h);
     }
-    function animate() {
-      angle += 0.002;
-      draw();
-      requestAnimationFrame(animate);
-    }
-    window.addEventListener('resize', resize);
-    resize();
-    animate();
+    function animate() { angle += 0.002; draw(); requestAnimationFrame(animate); }
+    window.addEventListener('resize', resize); resize(); animate();
 
     const SHEET_ID = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
     const SHEET_NAME = 'Form Responses 1';
@@ -265,9 +186,7 @@
       if (Notification.permission !== 'granted') Notification.requestPermission();
     }
 
-    function sendNotification(msg) {
-      if (Notification.permission === 'granted') new Notification(msg);
-    }
+    function sendNotification(msg) { if (Notification.permission === 'granted') new Notification(msg); }
 
     async function refresh() {
       const spinner = document.getElementById('spinner');
@@ -280,12 +199,10 @@
         const rows = json.table.rows || [];
         const data = rows.filter(r => r.c[0]?.v && r.c[1]?.v && r.c[1].v.toLowerCase() !== 'ad soyad');
         const names = data.map(r => r.c[1].v);
-        if (previousFirst && !names.includes(previousFirst)) {
-          sendNotification(`${previousFirst}, mola sırası sende!`);
-        }
+        if (previousFirst && !names.includes(previousFirst)) { sendNotification(`${previousFirst}, mola sırası sende!`); }
         tbody.innerHTML = data.length
           ? data.map((r, i) =>
-              `<tr><td>${i + 1}</td><td>${r.c[0].f || r.c[0].v || '-}</td><td>${r.c[1].v}</td></tr>`
+              `<tr><td>${i + 1}</td><td>${r.c[0].f || r.c[0].v || '-'}</td><td>${r.c[1].v}</td></tr>`
             ).join('')
           : `<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
         previousFirst = data[0]?.c[1]?.v || null;
@@ -296,11 +213,7 @@
       }
     }
 
-    window.addEventListener('load', () => {
-      requestNotificationPermission();
-      refresh();
-      setInterval(refresh, 5000);
-    });
+    window.addEventListener('load', () => { requestNotificationPermission(); refresh(); setInterval(refresh, 5000); });
   </script>
 </body>
 </html>
