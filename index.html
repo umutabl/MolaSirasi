@@ -228,89 +228,106 @@
     <p class="developer-names">© 2025 Geliştiriciler: Ahmet Can İnceoğlu ve Umut Ablay</p>
   </footer>
 
-<script>
-  const canvas = document.getElementById('background-gradient-canvas');
-  const ctx = canvas.getContext('2d');
-  const colors = ['#002f6c', '#F9A825'];
-  let w, h, angle = 0;
+<script defer>
+    console.log("JS yüklendi ve çalışıyor.");
 
-  function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-  }
+    const SHEET_ID   = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
+    const SHEET_NAME = 'Form Responses 1';
+    const BASE_URL   =
+      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`
+      + `?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
 
-  function draw() {
-    const grd = ctx.createLinearGradient(
-      w * Math.cos(angle), h * Math.sin(angle),
-      w * Math.cos(angle + Math.PI), h * Math.sin(angle + Math.PI)
-    );
-    colors.forEach((color, i) => grd.addColorStop(i / (colors.length - 1), color));
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, w, h);
-  }
+    let previousFirst = null;
 
-  function animate() {
-    angle += 0.002;
-    draw();
-    requestAnimationFrame(animate);
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-  animate();
-
-  const SHEET_ID = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
-  const SHEET_NAME = 'Form Responses 1';
-  const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
-  let previousFirst = null;
-
-  function requestNotificationPermission() {
-    if (!('Notification' in window)) return;
-    if (Notification.permission !== 'granted') Notification.requestPermission();
-  }
-
-  function sendNotification(msg) {
-    if (Notification.permission === 'granted') new Notification(msg);
-  }
-
-  async function refresh() {
-    const spinner = document.getElementById('spinner');
-    const tbody = document.querySelector('#molaTable tbody');
-    spinner.style.display = 'block';
-
-    try {
-      const res = await fetch(`${BASE_URL}&cacheBuster=${Date.now()}`, { cache: 'no-store' });
-      const txt = await res.text();
-      const json = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
-      const rows = json.table.rows || [];
-
-      const data = rows.filter(r => r.c[0]?.v && r.c[1]?.v && r.c[1].v.toLowerCase() !== 'ad soyad');
-      const names = data.map(r => r.c[1].v);
-
-      if (previousFirst && !names.includes(previousFirst)) {
-        sendNotification(`${previousFirst}, mola sırası sende!`);
+    // Bildirim izni istemek için fonksiyon
+    function requestNotificationPermission() {
+      if (!("Notification" in window)) {
+        console.log("Notification API desteklenmiyor.");
+        return;
       }
-
-      tbody.innerHTML = data.length
-        ? data.map((r, i) =>
-            `<tr><td>${i + 1}</td><td>${r.c[0].f || r.c[0].v || '-'}</td><td>${r.c[1].v}</td></tr>`
-          ).join('')
-        : `<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
-
-      previousFirst = data[0]?.c[1]?.v || null;
-    } catch {
-      tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
-    } finally {
-      spinner.style.display = 'none';
+      if (Notification.permission !== "granted") {
+        Notification.requestPermission()
+          .then(p => console.log("Bildirim izni:", p))
+          .catch(err => console.error("Bildirim izni alınamadı:", err));
+      }
     }
-  }
 
-  window.addEventListener('load', () => {
-    requestNotificationPermission();
-    refresh();
-    setInterval(refresh, 5000);
-  });
+    // Bildirim gönderen fonksiyon
+    function sendNotification(message) {
+      if (!("Notification" in window) || Notification.permission !== "granted") {
+        return;
+      }
+      const sound = new Audio(
+        'https://www.soundjay.com/button/beep-07.wav'
+      );
+      sound.play().catch(()=>{/* atla */});
+      new Notification(message);
+    }
+
+    // Veriyi alıp tabloyu güncelleyen fonksiyon
+    async function refresh() {
+      const spinner = document.getElementById('spinner');
+      const tbody   = document.querySelector('#molaTable tbody');
+      spinner.style.display = 'block';
+
+      try {
+        const res = await fetch(
+          `${BASE_URL}&cacheBuster=${Date.now()}`, { cache: 'no-store' }
+        );
+        const txt  = await res.text();
+        const json = JSON.parse(
+          txt.slice(txt.indexOf('{'), txt.lastIndexOf('}')+1)
+        );
+        const rows = json.table.rows || [];
+
+        // Tabloya yerleşebilecek veri filtreleme
+        const dataRows = rows.filter(r => {
+          const t = r.c?.[0]?.v, n = r.c?.[1]?.v;
+          return t && n
+            && n.toString().toLowerCase() !== "ad soyad"
+            && t.toString().toLowerCase() !== "zaman damgası";
+        });
+
+        tbody.innerHTML = '';
+
+        // Bildirim kontrolü
+        const currentNames = dataRows.map(r => r.c[1].v);
+        if (previousFirst && !currentNames.includes(previousFirst)) {
+          sendNotification(`${previousFirst}, mola sırası sende!`);
+        }
+
+        // Tabloyu doldur
+        if (dataRows.length) {
+          dataRows.forEach((r,i) => {
+            const ts   = r.c[0].f || r.c[0].v || '-';
+            const name = r.c[1].v || '-';
+            const tr   = document.createElement('tr');
+            tr.innerHTML = `<td>${i+1}</td><td>${ts}</td><td>${name}</td>`;
+            tbody.appendChild(tr);
+          });
+        } else {
+          tbody.innerHTML =
+            `<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
+        }
+
+        previousFirst = dataRows[0]?.c[1]?.v || null;
+      } catch (err) {
+        console.error("Veri yüklenirken hata:", err);
+        tbody.innerHTML =
+          `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
+      } finally {
+        spinner.style.display = 'none';
+      }
+    }
+
+    // Sayfa yüklendiğinde yapılacak işlemler
+    window.addEventListener('load', () => {
+      requestNotificationPermission();  // Bildirim izni iste
+      refresh();  // İlk veri çekme ve tabloyu güncelleme
+      setInterval(refresh, 5000);  // 5 saniyede bir yenileme
+    });
 </script>
+
 
 </body>
 </html>
