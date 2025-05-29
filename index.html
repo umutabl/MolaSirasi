@@ -1,207 +1,157 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
+<html lang="tr"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mola Sırası</title>
   <style>
-    :root {
-      --primary: #002f6c;
-      --accent: #f9a825;
-      --light: #ffffff;
-      --gray-lt: #f5f5f5;
-      --gray-md: #e0e0e0;
-      --font: 'Helvetica Neue', Arial, sans-serif;
+    :root{
+      --primary:#002f6c;
+      --light:#fff;
+      --font:'Helvetica Neue',Arial,sans-serif;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      font-family: var(--font);
-      background: var(--gray-lt);
-      color: var(--primary);
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family:var(--font);
+      color:var(--primary);
+      position:relative;
+      min-height:100vh;
+      overflow:hidden;
+      background:#000;
     }
-    .container {
-      max-width: 960px;
-      margin: auto;
-      padding: 0 16px;
+    #background-gradient-canvas{
+      position:fixed;
+      inset:0;
+      width:100vw;
+      height:100vh;
+      z-index:-1;
+      display:block;
     }
-    header { background: var(--light); border-bottom: 2px solid var(--gray-md); }
-    header .container {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 0;
+p.version {
+    margin: 0px;
+    font-size: 12px !important;
+    font-weight: 400;
+    line-height: 18px;
+    text-align: center;
+    color: white;
+    opacity: 0.5;
+    margin-top: 5px;
+}
+
+    .container{max-width:960px;margin:auto;padding:0 16px;}
+    header{backdrop-filter:blur(10px);border-bottom:2px solid rgba(0,0,0,0.1);}
+    header .container{display:flex;align-items:center;justify-content:space-between;padding:12px 0;}
+    .logo{font-size:1.4rem;font-weight:bold;color:var(--primary);}
+    .logo span{color:#F9A825;}
+    .hero{padding:80px 0;text-align:center;color:var(--light);position:relative;z-index:1;}
+    .hero h1{font-size:2.5rem;font-weight:bold;margin-bottom:12px;text-shadow:2px 2px 5px rgba(0,0,0,0.5);}
+    .hero p{font-size:1.1rem;margin-bottom:20px;text-shadow:1px 1px 4px rgba(0,0,0,0.4);}
+    .btn{display:inline-block;background:var(--primary);color:var(--light);padding:14px 30px;border-radius:30px;text-decoration:none;font-weight:500;transition:transform .2s;box-shadow:0 4px 12px rgba(0,0,0,0.3);font-size:1.1rem;}
+    .btn:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,0.4);}
+    .table-wrapper{padding:24px 0;flex:1;position:relative;z-index:1;}
+    .table-container{position:relative;}
+    table{width:100%;border-collapse:collapse;background:var(--light);box-shadow:0 4px 6px rgba(0,0,0,0.1);border-radius: 8px;overflow: hidden;}
+    th,td{padding:14px;text-align:left;}
+    thead{background:var(--primary);color:var(--light);font-size:1.2rem;font-weight:bold;text-transform:uppercase;}
+    tbody tr:nth-child(even){background:#f5f5f5;}
+    .spinner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border:4px solid #e0e0e0;border-top:4px solid var(--primary);border-radius:50%;width:36px;height:36px;animation:spin 1s linear infinite;display:none;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .placeholder{text-align:center;color:#555;font-style:italic;padding:12px;}
+    footer{
+      backdrop-filter:blur(10px);
+      border-top:2px solid rgba(0,0,0,0.1);
+      text-align:center;
+      padding:20px 0;
+      color:#555;
+      font-size:16px;
+      font-weight:bold;
+      letter-spacing:1px;
+      position:fixed; /* Footer'ı sabitlemek için fixed kullanıyoruz */
+      bottom:0; /* Alt kısmı sabitler */
+      width:100%; /* Tam genişlik */
+      z-index:1;
     }
-    .logo { font-size: 1.4rem; font-weight: bold; }
-    .logo span { color: var(--accent); }
-    .hero { background: var(--light); border-bottom: 2px solid var(--gray-md); }
-    .hero .container { text-align: center; padding: 24px 0; }
-    .hero h1 { font-size: 2rem; margin-bottom: 8px; }
-    .accent-icon { color: var(--accent); margin-right: 8px; }
-    .hero p { color: #555; margin-bottom: 16px; }
-    .btn {
-      display: inline-block; background: var(--primary); color: var(--light);
-      padding: 10px 20px; border-radius: 4px; text-decoration: none;
-      font-weight: 500; transition: background .2s; margin-top: 8px;
+    footer .developer-names{
+      font-size:16px;
+      font-weight:700;
+      -webkit-background-clip:text;
+      color: #ffffff;
+      text-shadow:2px 2px 6px rgba(0,0,0,0.2);
     }
-    .btn:hover { background: #001f4c; }
-    .table-wrapper { background: var(--light); padding: 24px 0; flex: 1; }
-    .table-container { position: relative; }
-    table {
-      width: 100%; border-collapse: collapse; background: var(--light);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    th, td { padding: 12px; text-align: left; }
-    thead { background: var(--primary); color: var(--light); }
-    tbody tr:nth-child(even) { background: var(--gray-lt); }
-    .spinner {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      border: 4px solid var(--gray-md);
-      border-top: 4px solid var(--primary);
-      border-radius: 50%; width: 36px; height: 36px;
-      animation: spin 1s linear infinite; display: none;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .placeholder {
-      text-align: center; color: #555; font-style: italic; padding: 12px;
-    }
-    footer {
-      background: var(--light);
-      border-top: 2px solid var(--gray-md);
-      text-align: center;
-      padding: 12px 0;
-      color: #555;
-      font-size: 0.9rem;
-    }
+    footer .developer-names:hover{text-shadow:2px 2px 8px rgba(0,0,0,0.5);}
+    @media(max-width:768px){.hero h1{font-size:2rem;}.btn{padding:12px 24px;font-size:1rem;}table{font-size:0.9rem;}}
   </style>
 </head>
 <body>
+  <canvas id="background-gradient-canvas" width="978" height="738"></canvas>
   <header>
     <div class="container">
       <div class="logo">Turk<span>Net</span></div>
     </div>
   </header>
-
   <section class="hero">
     <div class="container">
       <h1><span class="accent-icon">⏱</span>Mola Sırası</h1>
       <p>Sıra bilgisi her <strong>5 saniyede</strong> güncellenir.</p>
-      <a href="https://forms.gle/wFexWKf69M3uJEAx5"
-         target="_blank"
-         class="btn">Mola Sırasına Katıl</a>
+      <a href="https://forms.gle/wFexWKf69M3uJEAx5" target="_blank" class="btn">Mola Sırasına Katıl</a>
     </div>
+<p class="version">v1.01</p>
   </section>
-
   <div class="table-wrapper">
     <div class="container table-container">
-      <div class="spinner" id="spinner"></div>
-      <table id="molaTable">
-        <thead>
-          <tr><th>#</th><th>Zaman Damgası</th><th>Ad Soyad</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div class="spinner" id="spinner" style="display: none;"></div>
+      <table id="molaTable"><thead><tr><th>#</th><th>Zaman Damgası</th><th>Ad Soyad</th></tr></thead><tbody><tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr></tbody></table>
     </div>
   </div>
-
   <footer>
-    &copy; 2025 Geliştiriciler: Ahmet Can İnceoğlu ve Umut Ablay
+    <p><span class="developer-names">© 2025 Geliştiriciler: Ahmet Can İnceoğlu ve Umut Ablay</span></p>
   </footer>
-
-  <script defer>
-    console.log("JS yüklendi ve çalışıyor.");
-
-    const SHEET_ID   = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
-    const SHEET_NAME = 'Form Responses 1';
-    const BASE_URL   =
-      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`
-      + `?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
-
-    let previousFirst = null;
-
-    function requestNotificationPermission() {
-      if (!("Notification" in window)) {
-        console.log("Notification API desteklenmiyor.");
-        return;
-      }
-      if (Notification.permission !== "granted") {
-        Notification.requestPermission()
-          .then(p => console.log("Bildirim izni:", p))
-          .catch(err => console.error("Bildirim izni alınamadı:", err));
-      }
-    }
-
-    function sendNotification(message) {
-      if (!("Notification" in window) || Notification.permission !== "granted") {
-        return;
-      }
-      const sound = new Audio(
-        'https://www.soundjay.com/button/beep-07.wav'
+  <script>
+    const canvas = document.getElementById('background-gradient-canvas');
+    const ctx = canvas.getContext('2d');
+    let w, h;
+    const colors = ['#002f6c', '#F9A825'];
+    function resize(){ w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+    let angle = 0;
+    function draw(){
+      const grd = ctx.createLinearGradient(
+        w * Math.cos(angle), h * Math.sin(angle),
+        w * Math.cos(angle + Math.PI), h * Math.sin(angle + Math.PI)
       );
-      sound.play().catch(()=>{/* atla */});
-      new Notification(message);
+      const step = 1 / (colors.length - 1);
+      colors.forEach((c, i) => grd.addColorStop(i * step, c));
+      ctx.fillStyle = grd;
+      ctx.fillRect(0,0,w,h);
     }
+    function animate(){ angle += 0.002; draw(); requestAnimationFrame(animate); }
+    window.addEventListener('resize', resize);
+    resize(); animate();
 
-    async function refresh() {
-      const spinner = document.getElementById('spinner');
-      const tbody   = document.querySelector('#molaTable tbody');
-      spinner.style.display = 'block';
-
-      try {
-        const res = await fetch(
-          `${BASE_URL}&cacheBuster=${Date.now()}`, { cache: 'no-store' }
-        );
-        const txt  = await res.text();
-        const json = JSON.parse(
-          txt.slice(txt.indexOf('{'), txt.lastIndexOf('}')+1)
-        );
-        const rows = json.table.rows || [];
-
-        const dataRows = rows.filter(r => {
-          const t = r.c?.[0]?.v, n = r.c?.[1]?.v;
-          return t && n
-            && n.toString().toLowerCase() !== "ad soyad"
-            && t.toString().toLowerCase() !== "zaman damgası";
-        });
-
-        tbody.innerHTML = '';
-
-        // Bildirim kontrolü
-        const currentNames = dataRows.map(r => r.c[1].v);
-        if (previousFirst && !currentNames.includes(previousFirst)) {
-          sendNotification(`${previousFirst}, mola sırası sende!`);
-        }
-
-        // Tablo doldur
-        if (dataRows.length) {
-          dataRows.forEach((r,i) => {
-            const ts   = r.c[0].f || r.c[0].v || '-';
-            const name = r.c[1].v || '-';
-            const tr   = document.createElement('tr');
-            tr.innerHTML = `<td>${i+1}</td><td>${ts}</td><td>${name}</td>`;
-            tbody.appendChild(tr);
-          });
-        } else {
-          tbody.innerHTML =
-            `<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
-        }
-
-        previousFirst = dataRows[0]?.c[1]?.v || null;
-      } catch (err) {
-        console.error("Veri yüklenirken hata:", err);
-        tbody.innerHTML =
-          `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
-      } finally {
-        spinner.style.display = 'none';
-      }
+    // Veri çekme ve bildirim
+    const SHEET_ID='1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
+    const SHEET_NAME='Form Responses 1';
+    const BASE_URL=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
+    let previousFirst=null;
+    function requestNotificationPermission(){if(!('Notification'in window))return;if(Notification.permission!=='granted')Notification.requestPermission();}
+    function sendNotification(msg){if(Notification.permission==='granted')new Notification(msg);}
+    async function refresh(){
+      const spinner=document.getElementById('spinner');
+      const tbody=document.querySelector('#molaTable tbody');
+      spinner.style.display='block';
+      try{
+        const res=await fetch(`${BASE_URL}&cacheBuster=${Date.now()}`,{cache:'no-store'});
+        const txt=await res.text();
+        const json=JSON.parse(txt.slice(txt.indexOf('{'),txt.lastIndexOf('}')+1));
+        const rows=json.table.rows||[];
+        const data=rows.filter(r=>r.c[0]?.v&&r.c[1]?.v&&r.c[1].v.toLowerCase()!=='ad soyad');
+        const names=data.map(r=>r.c[1].v);
+        if(previousFirst&&!names.includes(previousFirst))sendNotification(`${previousFirst}, mola sırası sende!`);
+        tbody.innerHTML=data.length?data.map((r,i)=>`<tr><td>${i+1}</td><td>${r.c[0].f||r.c[0].v||'-'}</td><td>${r.c[1].v}</td></tr>`).join(''):`<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
+        previousFirst=data[0]?.c[1]?.v||null;
+      }catch{
+        tbody.innerHTML=`<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
+      }finally{spinner.style.display='none';}
     }
-
-    window.addEventListener('load', () => {
-      requestNotificationPermission();
-      refresh();
-      setInterval(refresh, 5000);
-    });
+    window.addEventListener('load',()=>{requestNotificationPermission();refresh();setInterval(refresh,5000);});
   </script>
-</body>
-</html>
+
+
+</body></html>
