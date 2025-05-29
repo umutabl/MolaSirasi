@@ -10,6 +10,7 @@
       --light: #fff;
       --font: 'Helvetica Neue', Arial, sans-serif;
       --diameter: 35vmax;
+      --footer-height: 60px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
@@ -18,76 +19,50 @@
       color: var(--primary);
       background: #000;
       position: relative;
-      padding-bottom: 100px;
+      padding-bottom: var(--footer-height);
       overflow-x: hidden;
     }
 
     /* Aurora effect overlay */
     .aurora {
-      position: fixed;
-      inset: 0;
-      z-index: -2;
+      position: fixed; inset: 0; z-index: -2;
     }
     .aurora::before, .aurora::after {
-      content: '';
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      border-radius: 50%;
-      opacity: .18;
+      content: ''; position: absolute; width: 1px; height: 1px; border-radius: 50%; opacity: .18;
     }
-    .aurora::before {
-      box-shadow: 0 0 var(--diameter) var(--diameter) red;
-      animation: hue 5s linear infinite, move1 10s linear infinite;
-    }
-    .aurora::after {
-      box-shadow: 0 0 var(--diameter) var(--diameter) cyan;
-      animation: hue 10s linear infinite, move2 20s linear infinite;
-    }
-    @keyframes hue { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
-    @keyframes move1 {
-      0% { top: 0vh; left: 50vw; }
-      25% { left: 0vw; }
-      50% { top: 100vh; }
-      75% { left: 100vw; }
-      100% { top: 0vh; left: 50vw; }
-    }
-    @keyframes move2 {
-      0% { top: 50vh; left: 100vw; }
-      25% { top: 100vh; }
-      50% { left: 0vw; }
-      75% { top: 0vh; }
-      100% { top: 50vh; left: 100vw; }
-    }
+    .aurora::before { box-shadow: 0 0 var(--diameter) var(--diameter) red; animation: hue 5s linear infinite, move1 10s linear infinite; }
+    .aurora::after  { box-shadow: 0 0 var(--diameter) var(--diameter) cyan; animation: hue 10s linear infinite, move2 20s linear infinite; }
+    @keyframes hue   { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+    @keyframes move1 { 0% { top:0; left:50vw;}25%{left:0;}50%{top:100vh;}75%{left:100vw;}100%{top:0;left:50vw;} }
+    @keyframes move2 { 0% { top:50vh;left:100vw;}25%{top:100vh;}50%{left:0;}75%{top:0;}100%{top:50vh;left:100vw;} }
 
     /* Existing styles */
-    #background-gradient-canvas {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: -3;
+    #background-gradient-canvas { position: fixed; inset: 0; width:100vw; height:100vh; z-index:-3; }
+    header { position:sticky; top:0; z-index:15; backdrop-filter: blur(10px); border-bottom:2px solid rgba(0,0,0,0.1); }
+    .container { max-width:960px; margin:auto; padding:12px 16px; }
+    .logo { font-size:1.4rem; font-weight:bold; color:var(--primary); }
+    .logo span { color:#f9a825; }
+    .hero { padding:60px 16px; text-align:center; color:var(--light); }
+    .hero h1 { font-size:2.2rem; margin-bottom:12px; }
+    .hero p  { font-size:1rem; margin-bottom:20px; }
+    .btn  { display:inline-block; background:var(--primary); color:var(--light); padding:12px 28px; border-radius:30px; text-decoration:none; font-weight:500; transition:transform 0.2s; box-shadow:0 4px 12px rgba(0,0,0,0.3); font-size:1.1rem; }
+    .btn:hover { transform:translateY(-3px); }
+    .table-wrapper { padding:24px 16px; max-width:960px; margin:auto; margin-bottom:100px; }
+    table { width:100%; border-collapse:collapse; background:var(--light); box-shadow:0 4px 6px rgba(0,0,0,0.1); border-radius:8px; overflow:hidden; }
+    th, td { padding:14px; text-align:left; }
+    thead { background:var(--primary); color:var(--light); font-size:1.1rem; font-weight:bold; }
+    tbody tr:nth-child(even) { background:#f5f5f5; }
+    .placeholder { text-align:center; color:#555; font-style:italic; padding:12px; }
+    .spinner { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); border:4px solid #e0e0e0; border-top:4px solid var(--primary); border-radius:50%; width:36px; height:36px; animation:spin 1s linear infinite; display:none; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    footer {
+      position:fixed; bottom:0; left:0; width:100%; height:var(--footer-height);
+      backdrop-filter: blur(10px); border-top:2px solid rgba(255,255,255,0.1);
+      text-align:center; padding:12px 0; font-size:14px; color:white; font-weight:bold;
+      z-index:20;
     }
-    header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); border-bottom: 2px solid rgba(0,0,0,0.1); }
-    .container { max-width: 960px; margin: auto; padding: 12px 16px; }
-    .logo { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
-    .logo span { color: #f9a825; }
-    .hero { padding: 60px 16px; text-align: center; color: var(--light); }
-    .hero h1 { font-size: 2.2rem; margin-bottom: 12px; }
-    .hero p { font-size: 1rem; margin-bottom: 20px; }
-    .btn { display: inline-block; background: var(--primary); color: var(--light); padding: 12px 28px; border-radius: 30px; text-decoration: none; font-weight: 500; transition: transform 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 1.1rem; }
-    .btn:hover { transform: translateY(-3px); }
-    .table-wrapper { padding: 24px 16px; max-width: 960px; margin: auto; }
-    table { width: 100%; border-collapse: collapse; background: var(--light); box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
-    th, td { padding: 14px; text-align: left; }
-    thead { background: var(--primary); color: var(--light); font-size: 1.1rem; font-weight: bold; }
-    tbody tr:nth-child(even) { background: #f5f5f5; }
-    .placeholder { text-align: center; color: #555; font-style: italic; padding: 12px; }
-    .spinner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 4px solid #e0e0e0; border-top: 4px solid var(--primary); border-radius: 50%; width: 36px; height: 36px; animation: spin 1s linear infinite; display: none; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    footer { position: fixed; bottom: 0; left: 0; width: 100%; backdrop-filter: blur(10px); border-top: 2px solid rgba(255,255,255,0.1); text-align: center; padding: 12px 0; font-size: 14px; color: white; font-weight: bold; z-index: 10; }
-    footer .developer-names { font-size: 12px; color: white; }
-    @media (max-width: 768px) { .hero h1 { font-size: 1.8rem; } .btn { font-size: 1rem; padding: 10px 22px; } }
+    footer .developer-names { font-size:12px; color:white; }
+    @media (max-width:768px) { .hero h1 { font-size:1.8rem; } .btn { font-size:1rem; padding:10px 22px; } }
   </style>
 </head>
 <body>
@@ -125,30 +100,18 @@
 
     const SHEET_ID   = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
     const SHEET_NAME = 'Form Responses 1';
-    const BASE_URL   =
-      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`
-      + `?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
+    const BASE_URL   =`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`+`?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json`;
 
     let previousFirst = null;
 
     function requestNotificationPermission() {
-      if (!("Notification" in window)) {
-        console.log("Notification API desteklenmiyor.");
-        return;
-      }
-      if (Notification.permission !== "granted") {
-        Notification.requestPermission()
-          .then(p => console.log("Bildirim izni:", p))
-          .catch(err => console.error("Bildirim izni alınamadı:", err));
-      }
+      if (!("Notification" in window)) { console.log("Notification API desteklenmiyor."); return; }
+      if (Notification.permission !== "granted") Notification.requestPermission().then(p=>console.log("Bildirim izni:",p)).catch(err=>console.error(err));
     }
 
     function sendNotification(message) {
-      if (!("Notification" in window) || Notification.permission !== "granted") {
-        return;
-      }
-      const sound = new Audio('https://www.soundjay.com/button/beep-07.wav');
-      sound.play().catch(()=>{});
+      if (!("Notification" in window)||Notification.permission!=="granted") return;
+      new Audio('https://www.soundjay.com/button/beep-07.wav').play().catch(()=>{});
       new Notification(message);
     }
 
@@ -156,53 +119,21 @@
       const spinner = document.getElementById('spinner');
       const tbody   = document.querySelector('#molaTable tbody');
       spinner.style.display = 'block';
-
       try {
-        const res = await fetch(`${BASE_URL}&cacheBuster=${Date.now()}`, { cache: 'no-store' });
-        const txt  = await res.text();
+        const res = await fetch(`${BASE_URL}&cacheBuster=${Date.now()}`, {cache:'no-store'});
+        const txt = await res.text();
         const json = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}')+1));
-        const rows = json.table.rows || [];
-
-        const dataRows = rows.filter(r => {
-          const t = r.c?.[0]?.v, n = r.c?.[1]?.v;
-          return t && n
-            && n.toString().toLowerCase() !== "ad soyad"
-            && t.toString().toLowerCase() !== "zaman damgası";
-        });
-
-        tbody.innerHTML = '';
-
-        const currentNames = dataRows.map(r => r.c[1].v);
-        if (previousFirst && !currentNames.includes(previousFirst)) {
-          sendNotification(`${previousFirst}, mola sırası sende!`);
-        }
-
-        if (dataRows.length) {
-          dataRows.forEach((r,i) => {
-            const ts   = r.c[0].f || r.c[0].v || '-';
-            const name = r.c[1].v || '-';
-            const tr   = document.createElement('tr');
-            tr.innerHTML = `<td>${i+1}</td><td>${ts}</td><td>${name}</td>`;
-            tbody.appendChild(tr);
-          });
-        } else {
-          tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
-        }
-
-        previousFirst = dataRows[0]?.c[1]?.v || null;
-      } catch (err) {
-        console.error("Veri yüklenirken hata:", err);
-        tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
-      } finally {
-        spinner.style.display = 'none';
-      }
+        const rows = json.table.rows||[];
+        const dataRows = rows.filter(r=>{const t=r.c?.[0]?.v,n=r.c?.[1]?.v;return t&&n&&n.toString().toLowerCase()!="ad soyad"&&t.toString().toLowerCase()!="zaman damgası";});
+        tbody.innerHTML='';
+        const names=dataRows.map(r=>r.c[1].v);
+        if(previousFirst&& !names.includes(previousFirst)) sendNotification(`${previousFirst}, mola sırası sende!`);
+        if(dataRows.length){dataRows.forEach((r,i)=>{const ts=r.c[0].f||r.c[0].v||'-',nm=r.c[1].v||'-',tr=document.createElement('tr');tr.innerHTML=`<td>${i+1}</td><td>${ts}</td><td>${nm}</td>`;tbody.appendChild(tr);});}
+        else tbody.innerHTML=`<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
+        previousFirst=dataRows[0]?.c[1]?.v||null;
+      } catch(err){console.error(err);tbody.innerHTML=`<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;} finally{spinner.style.display='none';}
     }
-
-    window.addEventListener('load', () => {
-      requestNotificationPermission();
-      refresh();
-      setInterval(refresh, 5000);
-    });
+    window.addEventListener('load',()=>{requestNotificationPermission();refresh();setInterval(refresh,5000);});
   </script>
 </body>
 </html>
