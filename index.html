@@ -154,22 +154,57 @@ body , html {
       margin: auto;
       position: relative;
     }
-    .spinner {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%,-50%);
-      border: 4px solid #e0e0e0;
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      animation: spin 1s linear infinite;
-      display: none;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    /* Loader container */
+.loader {
+  position: absolute;
+  top: calc(0% - 32px);
+  left: calc(50% - 32px);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  perspective: 800px;
+  display: none; /* Başlangıçta gizli */
+}
+
+.inner {
+  position: absolute;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+.inner.one {
+  left: 0;
+  top: 0;
+  border-bottom: 3px solid #EFEFFA;
+  animation: rotate-one 1s linear infinite;
+}
+.inner.two {
+  right: 0;
+  top: 0;
+  border-right: 3px solid #EFEFFA;
+  animation: rotate-two 1s linear infinite;
+}
+.inner.three {
+  right: 0;
+  bottom: 0;
+  border-top: 3px solid #EFEFFA;
+  animation: rotate-three 1s linear infinite;
+}
+
+@keyframes rotate-one {
+  from { transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg); }
+  to   { transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg); }
+}
+@keyframes rotate-two {
+  from { transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg); }
+  to   { transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg); }
+}
+@keyframes rotate-three {
+  from { transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg); }
+  to   { transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg); }
+}
+
 
     table {
       width: 100%;
@@ -238,7 +273,11 @@ body , html {
     </div>
   </section>
   <div class="table-wrapper">
-    <div class="spinner" id="spinner"></div>
+    <div class="loader" id="loader">
+  <div class="inner one"></div>
+  <div class="inner two"></div>
+  <div class="inner three"></div>
+</div>
     <table id="molaTable">
       <thead><tr><th>#</th><th>Zaman Damgası</th><th>Ad Soyad</th></tr></thead>
       <tbody><tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr></tbody>
@@ -269,9 +308,9 @@ body , html {
   }
 
   async function refresh() {
-    const spinner = document.getElementById('spinner');
+    const loader = document.getElementById('loader');
     const tbody = document.querySelector('#molaTable tbody');
-    spinner.style.display = 'block';
+    loader.style.display = 'block';
     try {
       const res = await fetch(`${BASE_URL}&cacheBuster=${Date.now()}`, { cache: 'no-store' });
       const txt = await res.text();
@@ -303,7 +342,7 @@ body , html {
       console.error('Veri yüklenirken hata:', e);
       tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
     } finally {
-      spinner.style.display = 'none';
+      loader.style.display = 'none';
     }
   }
 
