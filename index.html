@@ -216,36 +216,9 @@ body , html {
       height: 100%;
       line-height: 10vh;
     }
-    .text {
-      font-size: 16px;
-      font-weight: 600;
-      color: white;
-      background: linear-gradient(
-        90deg,
-        color-mix( in oklab, var(--lightish-blue), white 10%),
-        color-mix( in oklab, var(--deeper-blue), white 10%),
-        color-mix( in oklab, var(--purpla), white 10%),
-        color-mix( in oklab, var(--magente), white 10%),
-        color-mix( in oklab, var(--haute-pink), white 10%),
-        color-mix( in oklab, var(--red), white 10%),
-        color-mix( in oklab, var(--more-redder), white 10%),
-        color-mix( in oklab, var(--oranj), white 10%)
-      );
-      filter: brightness(500%);
-      position: absolute;
-      user-select: none;
-      width: 100%;
-      text-align: center;
-    }
-
-    .text.blurred {
-      background-clip: text;
-      color: transparent;
-      filter: blur(24px);
-    }
-    .text.overlayed {
-      color: color-mix(in oklab, white, transparent 5%);
-      background: transparent;
+    
+   p { 
+      color: white; font-size: 0.8rem; 
     }
   </style>
 </head>
@@ -273,10 +246,7 @@ body , html {
   </div>
 </main>
 <footer>
-  <div class="footer-text">
-    <div class="text blurred">&copy; 2025 Geliştiriciler: Ahmet Can İnceoğlu ve Umut Ablay</div>
-    <div class="text overlayed">&copy; 2025 Geliştiriciler: Ahmet Can İnceoğlu ve Umut Ablay</div>
-  </div>
+<p>&copy; 2025 Geliştiriciler: Ahmet Can İnceoğlu ve Umut Ablay</p>  
 </footer>
 <script defer>
   const SHEET_ID = '1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q';
