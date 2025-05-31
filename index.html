@@ -403,7 +403,7 @@
     </div>
   </div>
 
-  <!-- ---------- JavaScript Kısmı ---------- -->
+  <!-- ---------- JavaScript Kısmı (Bildirim Kodu Entegre Edildi) ---------- -->
   <script>
     // ******************** BURADA KENDİ İSMİNİZİ YAZIN ********************
     const YOUR_NAME = "AD SOYADINIZ"; // Örn: "Mehmet Yılmaz"
@@ -415,24 +415,49 @@
       SHEET_NAME
     )}&tqx=out:json`;
 
-    let previousFirst = null;   // Önceki güncellemeden önceki ilk isim
+    // Bildirim izni ve önceki veriyi saklamak için değişkenler
+    let previousData = [];   // Önceki tüm satırları saklamak için
+    let previousFirst = null; // Önceki turun 1. sırasındaki kişi
 
+    // Bildirim iznini almak için fonksiyon
     function requestNotificationPermission() {
-      if (!("Notification" in window)) return;
-      if (Notification.permission === "default") {
-        Notification.requestPermission();
+      // Notification API destek kontrolü
+      if (!("Notification" in window)) {
+        console.log("Notification API desteklenmiyor.");
+        return;
+      }
+      if (Notification.permission !== "granted") {
+        Notification.requestPermission()
+          .then(permission => {
+            console.log("Bildirim izni verildi:", permission);
+          })
+          .catch(err => {
+            console.error("Bildirim izni alınamadı:", err);
+          });
+      } else {
+        console.log("Bildirim izni zaten verilmiş.");
+        Notification.requestPermission()
+          .then(p => console.log("Bildirim izni:", p))
+          .catch(err => console.error("Bildirim izni alınamadı:", err));
       }
     }
 
-    function sendNotification(msg) {
-      if (Notification.permission !== "granted") return;
-      // Sesli bildirim
-      const s = new Audio("https://www.soundjay.com/button/beep-07.wav");
-      s.play().catch(() => {});
-      // Tarayıcı bildirimi
-      new Notification(msg);
+    // Tarayıcı bildirim fonksiyonu
+    function sendNotification(message) {
+      if (Notification.permission === "granted") {
+        // Bildirim sesi
+        const notificationSound = new Audio('https://www.soundjay.com/button/beep-07.wav');
+        notificationSound.play().catch(() => { /* hıfırlama hatası atla */ });
+
+        // Tarayıcı bildirimi
+        new Notification(message);
+        console.log("Bildirim gönderildi:", message);
+      } else {
+        console.log("Bildirim izni verilmedi.");
+      }
     }
 
+    // 5 saniyede bir veriyi güncelleyen fonksiyon
     async function refresh() {
       const loader = document.getElementById("loader");
       const tbody = document.querySelector("#molaTable tbody");
@@ -448,6 +473,8 @@
           txt.slice(txt.indexOf("{"), txt.lastIndexOf("}") + 1)
         );
         const rows = json.table.rows || [];
+
+        // Geçerli veriyi filtrele
         const dataRows = rows.filter((r) => {
           const t = r.c?.[0]?.v;
           const n = r.c?.[1]?.v;
@@ -459,15 +486,18 @@
           );
         });
 
-        // Yeni güncellemede ilk sıradaki isim
-        const newFirst = dataRows[0]?.c[1]?.v || null;
+        // Mevcut sıradaki birinci kişi
+        const currentFirst = dataRows[0]?.c[1]?.v || null;
+        // Tüm mevcut isimler (sıralama içindeki)
         const currentNames = dataRows.map((r) => r.c[1].v);
 
-        // Eğer öncekiFirst !== newFirst ve newFirst bizim NAME ise, bildirim yolla
-        if (
-          newFirst === YOUR_NAME &&
-          previousFirst !== YOUR_NAME
-        ) {
+        // Eğer öncekiFirst mevcutsa ve artık listede yoksa => bildirim gönder
+        if (previousFirst && !currentNames.includes(previousFirst)) {
+          sendNotification(`${previousFirst}, mola sırası sende!`);
+        }
+
+        // Eğer yeniFirst, sizin adınız ise ve öncekiFirst sizin adınız değildiyse => bildirim gönder
+        if (currentFirst === YOUR_NAME && previousFirst !== YOUR_NAME) {
           sendNotification("Sıra sana geldi, " + YOUR_NAME + "!");
         }
 
@@ -485,8 +515,9 @@
           tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
         }
 
-        // Güncellemeden sonraki previousFirst = newFirst olacak
-        previousFirst = newFirst;
+        // Yenileme sonrası önceki veriyi güncelle
+        previousData = dataRows;
+        previousFirst = currentFirst;
       } catch (e) {
         console.error("Veri yüklenirken hata:", e);
         tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
