@@ -101,8 +101,7 @@
         circle at center,
         rgba(var(--color1), 0.8) 0,
         rgba(var(--color1), 0) 50%
-      )
-      no-repeat;
+      ) no-repeat;
       width: var(--circle-size);
       height: var(--circle-size);
       top: calc(50% - var(--circle-size) / 2);
@@ -403,10 +402,11 @@
     </div>
   </div>
 
-  <!-- ---------- JavaScript Kısmı (Bildirim Kodu Entegre Edildi) ---------- -->
+  <!-- ---------- JavaScript Kısmı (Bildirim Kodu Entegre Edildi - Güncellenmiş) ---------- -->
   <script>
-    // ******************** BURADA KENDİ İSMİNİZİ YAZIN ********************
-    const YOUR_NAME = "AD SOYADINIZ"; // Örn: "Mehmet Yılmaz"
+    // ******************** BURAYA KENDİ İSMİNİ VE SOYADINI YAZ ********************
+    // Örnek: const YOUR_NAME = "Mehmet Yılmaz";
+    const YOUR_NAME = "AD SOYADINIZ";
     // **********************************************************************
 
     const SHEET_ID = "1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q";
@@ -415,13 +415,11 @@
       SHEET_NAME
     )}&tqx=out:json`;
 
-    // Bildirim izni ve önceki veriyi saklamak için değişkenler
-    let previousData = [];   // Önceki tüm satırları saklamak için
-    let previousFirst = null; // Önceki turun 1. sırasındaki kişi
+    // Önceki “1. kişi” bilgisini saklamak için
+    let previousFirst = null;
 
     // Bildirim iznini almak için fonksiyon
     function requestNotificationPermission() {
-      // Notification API destek kontrolü
       if (!("Notification" in window)) {
         console.log("Notification API desteklenmiyor.");
         return;
@@ -429,42 +427,45 @@
       if (Notification.permission !== "granted") {
         Notification.requestPermission()
           .then(permission => {
-            console.log("Bildirim izni verildi:", permission);
+            console.log("Bildirim izni durumu:", permission);
           })
           .catch(err => {
             console.error("Bildirim izni alınamadı:", err);
           });
       } else {
-        console.log("Bildirim izni zaten verilmiş.");
-        Notification.requestPermission()
-          .then(p => console.log("Bildirim izni:", p))
-          .catch(err => console.error("Bildirim izni alınamadı:", err));
+        console.log("Bildirim izni zaten verilmiş:", Notification.permission);
       }
     }
 
-    // Tarayıcı bildirim fonksiyonu
+    // Tarayıcı bildirimi ve ses oynatma
     function sendNotification(message) {
       if (Notification.permission === "granted") {
-        // Bildirim sesi
-        const notificationSound = new Audio('https://www.soundjay.com/button/beep-07.wav');
-        notificationSound.play().catch(() => { /* hıfırlama hatası atla */ });
+        // Bildirim sesi (OPSİYONEL – eğer tarayıcı engellerse hata alabilir)
+        const notificationSound = new Audio(
+          "https://www.soundjay.com/button/beep-07.wav"
+        );
+        notificationSound.play().catch(() => {
+          // Ses çalamazsa sessizce devam et
+        });
 
-        // Tarayıcı bildirimi
+        // Masaüstü bildirimi
         new Notification(message);
         console.log("Bildirim gönderildi:", message);
       } else {
-        console.log("Bildirim izni verilmedi.");
+        console.log("Bildirim izni verilmedi. Mesaj:", message);
       }
     }
 
-    // 5 saniyede bir veriyi güncelleyen fonksiyon
+    // 5 saniyede bir veriyi çekip tabloyu ve bildirimleri güncelleyen fonksiyon
     async function refresh() {
       const loader = document.getElementById("loader");
       const tbody = document.querySelector("#molaTable tbody");
+
       // Loader'ı göster
       loader.style.display = "block";
 
       try {
+        // Google Sheets'ten veriyi çek
         const res = await fetch(`${BASE_URL}&cacheBuster=${Date.now()}`, {
           cache: "no-store",
         });
@@ -474,7 +475,7 @@
         );
         const rows = json.table.rows || [];
 
-        // Geçerli veriyi filtrele
+        // Gelen satırları filtrele (başlık satırlarını atla)
         const dataRows = rows.filter((r) => {
           const t = r.c?.[0]?.v;
           const n = r.c?.[1]?.v;
@@ -486,24 +487,30 @@
           );
         });
 
-        // Mevcut sıradaki birinci kişi
+        // “Yeni 1. kişi” ve “Tüm mevcut isimler”
         const currentFirst = dataRows[0]?.c[1]?.v || null;
-        // Tüm mevcut isimler (sıralama içindeki)
         const currentNames = dataRows.map((r) => r.c[1].v);
 
-        // Eğer öncekiFirst mevcutsa ve artık listede yoksa => bildirim gönder
-        if (previousFirst && !currentNames.includes(previousFirst)) {
-          sendNotification(`${previousFirst}, mola sırası sende!`);
+        // Konsola debug bilgileri yaz (isteğe bağlı)
+        console.log("------- Yenileme -------");
+        console.log("Önceki First:", previousFirst);
+        console.log("Yeni First:", currentFirst);
+        console.log("İsim Listesi:", currentNames);
+
+        // Eğer bir öncekiFirst tanımlıysa ve şu anki yeniFirst, eskiFirst’den farklı ise bildirim gönder
+        if (previousFirst && currentFirst !== previousFirst) {
+          if (currentFirst === YOUR_NAME) {
+            // Eğer yeniFirst sen isen, özel mesaj
+            sendNotification("Sıra sana geldi, " + YOUR_NAME + "!");
+          } else {
+            // Başka kullanıcı 1. olduysa, ona genel mesaj
+            sendNotification(currentFirst + ", mola sırası sende!");
+          }
         }
 
-        // Eğer yeniFirst, sizin adınız ise ve öncekiFirst sizin adınız değildiyse => bildirim gönder
-        if (currentFirst === YOUR_NAME && previousFirst !== YOUR_NAME) {
-          sendNotification("Sıra sana geldi, " + YOUR_NAME + "!");
-        }
-
-        // Tabloyu güncelle
+        // Tabloya veri yazma
         tbody.innerHTML = "";
-        if (dataRows.length) {
+        if (dataRows.length > 0) {
           dataRows.forEach((r, i) => {
             const ts = r.c[0].f || r.c[0].v || "-";
             const name = r.c[1].v || "-";
@@ -515,8 +522,7 @@
           tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
         }
 
-        // Yenileme sonrası önceki veriyi güncelle
-        previousData = dataRows;
+        // Sonraki döngü için “previousFirst”i güncelle
         previousFirst = currentFirst;
       } catch (e) {
         console.error("Veri yüklenirken hata:", e);
@@ -527,6 +533,7 @@
       }
     }
 
+    // Sayfa yüklendiğinde bildirim izni iste ve döngüyü başlat
     window.addEventListener("load", () => {
       requestNotificationPermission();
       refresh();
