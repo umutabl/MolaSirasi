@@ -44,7 +44,6 @@
     }
     body {
       font-family: var(--font-family);
-      /* Arka plan rengini kaldırıp transparent yaptık */
       background-color: transparent;
       display: flex;
       align-items: center;
@@ -110,19 +109,16 @@
       left: calc(50% - var(--circle-size) / 2);
       opacity: 1;
     }
-    /* g1: dikey hareket */
     .gradient-bg .g1 {
       background: radial-gradient(circle at center, rgba(var(--color1), 0.8) 0, rgba(var(--color1), 0) 50%) no-repeat;
       transform-origin: center center;
       animation: moveVertical 30s ease infinite;
     }
-    /* g2: ters dairesel hareket */
     .gradient-bg .g2 {
       background: radial-gradient(circle at center, rgba(var(--color2), 0.8) 0, rgba(var(--color2), 0) 50%) no-repeat;
       transform-origin: calc(50% - 400px);
       animation: moveInCircle 20s reverse infinite;
     }
-    /* g3: normal dairesel, farklı konumda */
     .gradient-bg .g3 {
       background: radial-gradient(circle at center, rgba(var(--color3), 0.8) 0, rgba(var(--color3), 0) 50%) no-repeat;
       top: calc(50% - var(--circle-size) / 2 + 200px);
@@ -130,14 +126,12 @@
       transform-origin: calc(50% + 400px);
       animation: moveInCircle 40s linear infinite;
     }
-    /* g4: yatay hareket */
     .gradient-bg .g4 {
       background: radial-gradient(circle at center, rgba(var(--color4), 0.8) 0, rgba(var(--color4), 0) 50%) no-repeat;
       transform-origin: calc(50% - 200px);
       animation: moveHorizontal 40s ease infinite;
       opacity: 0.7;
     }
-    /* g5: büyük dairesel */
     .gradient-bg .g5 {
       background: radial-gradient(circle at center, rgba(var(--color5), 0.8) 0, rgba(var(--color5), 0) 50%) no-repeat;
       width: calc(var(--circle-size) * 2);
@@ -147,7 +141,6 @@
       transform-origin: calc(50% - 800px) calc(50% + 200px);
       animation: moveInCircle 20s ease infinite;
     }
-    /* interactive: fareyle etkileşim için (isteğe bağlı) */
     .gradient-bg .interactive {
       background: radial-gradient(circle at center, rgba(var(--color-interactive), 0.8) 0, rgba(var(--color-interactive), 0) 50%) no-repeat;
       width: 100%;
@@ -412,24 +405,31 @@
 
   <!-- ---------- JavaScript Kısmı ---------- -->
   <script>
+    // ******************** BURADA KENDİ İSMİNİZİ YAZIN ********************
+    const YOUR_NAME = "AD SOYADINIZ"; // Örn: "Mehmet Yılmaz"
+    // **********************************************************************
+
     const SHEET_ID = "1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q";
     const SHEET_NAME = "Form Responses 1";
     const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(
       SHEET_NAME
     )}&tqx=out:json`;
-    let previousFirst = null;
+
+    let previousFirst = null;   // Önceki güncellemeden önceki ilk isim
 
     function requestNotificationPermission() {
       if (!("Notification" in window)) return;
-      if (Notification.permission !== "granted") {
+      if (Notification.permission === "default") {
         Notification.requestPermission();
       }
     }
 
     function sendNotification(msg) {
       if (Notification.permission !== "granted") return;
+      // Sesli bildirim
       const s = new Audio("https://www.soundjay.com/button/beep-07.wav");
       s.play().catch(() => {});
+      // Tarayıcı bildirimi
       new Notification(msg);
     }
 
@@ -459,14 +459,20 @@
           );
         });
 
-        tbody.innerHTML = "";
+        // Yeni güncellemede ilk sıradaki isim
+        const newFirst = dataRows[0]?.c[1]?.v || null;
         const currentNames = dataRows.map((r) => r.c[1].v);
 
-        // Eğer önceki ilk isim listede yoksa bildirim gönder
-        if (previousFirst && !currentNames.includes(previousFirst)) {
-          sendNotification(`${previousFirst}, mola sırası sende!`);
+        // Eğer öncekiFirst !== newFirst ve newFirst bizim NAME ise, bildirim yolla
+        if (
+          newFirst === YOUR_NAME &&
+          previousFirst !== YOUR_NAME
+        ) {
+          sendNotification("Sıra sana geldi, " + YOUR_NAME + "!");
         }
 
+        // Tabloyu güncelle
+        tbody.innerHTML = "";
         if (dataRows.length) {
           dataRows.forEach((r, i) => {
             const ts = r.c[0].f || r.c[0].v || "-";
@@ -479,7 +485,8 @@
           tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
         }
 
-        previousFirst = dataRows[0]?.c[1]?.v || null;
+        // Güncellemeden sonraki previousFirst = newFirst olacak
+        previousFirst = newFirst;
       } catch (e) {
         console.error("Veri yüklenirken hata:", e);
         tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
