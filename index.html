@@ -402,7 +402,7 @@
     </div>
   </div>
 
-  <!-- ---------- JavaScript Kısmı (Bildirim Kodu Entegre Edildi - Güncellenmiş) ---------- -->
+  <!-- ---------- JavaScript Kısmı (GÜNCELLENMİŞ BİLDİRİM KODU) ---------- -->
   <script>
     // ******************** BURAYA KENDİ İSMİNİ VE SOYADINI YAZ ********************
     // Örnek: const YOUR_NAME = "Mehmet Yılmaz";
@@ -415,8 +415,9 @@
       SHEET_NAME
     )}&tqx=out:json`;
 
-    // Önceki “1. kişi” bilgisini saklamak için
-    let previousFirst = null;
+    // Önceki isim listesini ve son görülen ismi saklamak için
+    let previousNames = [];
+    let lastName = null;
 
     // Bildirim iznini almak için fonksiyon
     function requestNotificationPermission() {
@@ -440,7 +441,6 @@
     // Tarayıcı bildirimi ve ses oynatma
     function sendNotification(message) {
       if (Notification.permission === "granted") {
-        // Bildirim sesi (OPSİYONEL – eğer tarayıcı engellerse hata alabilir)
         const notificationSound = new Audio(
           "https://www.soundjay.com/button/beep-07.wav"
         );
@@ -448,7 +448,6 @@
           // Ses çalamazsa sessizce devam et
         });
 
-        // Masaüstü bildirimi
         new Notification(message);
         console.log("Bildirim gönderildi:", message);
       } else {
@@ -487,28 +486,29 @@
           );
         });
 
-        // “Yeni 1. kişi” ve “Tüm mevcut isimler”
-        const currentFirst = dataRows[0]?.c[1]?.v || null;
+        // Mevcut isim listesi
         const currentNames = dataRows.map((r) => r.c[1].v);
 
         // Konsola debug bilgileri yaz (isteğe bağlı)
         console.log("------- Yenileme -------");
-        console.log("Önceki First:", previousFirst);
-        console.log("Yeni First:", currentFirst);
-        console.log("İsim Listesi:", currentNames);
+        console.log("Önceki İsimler:", previousNames);
+        console.log("Mevcut İsimler:", currentNames);
 
-        // Eğer bir öncekiFirst tanımlıysa ve şu anki yeniFirst, eskiFirst’den farklı ise bildirim gönder
-        if (previousFirst && currentFirst !== previousFirst) {
-          if (currentFirst === YOUR_NAME) {
-            // Eğer yeniFirst sen isen, özel mesaj
-            sendNotification("Sıra sana geldi, " + YOUR_NAME + "!");
-          } else {
-            // Başka kullanıcı 1. olduysa, ona genel mesaj
-            sendNotification(currentFirst + ", mola sırası sende!");
+        // 1) Önceki listede olup, mevcut listede olmayan isimler için bildirim gönder
+        previousNames.forEach((isim) => {
+          if (!currentNames.includes(isim)) {
+            // Bu isim listeden eksildi
+            lastName = isim; // Son görülen eksilen ismi güncelle
+            sendNotification(isim + ", listenizden eksildi!");
           }
+        });
+
+        // 2) Eğer şu an kimse yoksa (boş liste), son görülen ismi kullanarak bildirim gönder
+        if (currentNames.length === 0 && lastName) {
+          sendNotification(lastName + ", listede kimse yok!");
         }
 
-        // Tabloya veri yazma
+        // 3) Tabloya veri yazma
         tbody.innerHTML = "";
         if (dataRows.length > 0) {
           dataRows.forEach((r, i) => {
@@ -522,8 +522,8 @@
           tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
         }
 
-        // Sonraki döngü için “previousFirst”i güncelle
-        previousFirst = currentFirst;
+        // Sonraki döngü için önceki isim listesini güncelle
+        previousNames = currentNames.slice(); // Kopya alıyoruz
       } catch (e) {
         console.error("Veri yüklenirken hata:", e);
         tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
