@@ -405,7 +405,7 @@
   <!-- ---------- JavaScript Kısmı (GÜNCELLENMİŞ BİLDİRİM KODU) ---------- -->
   <script>
     // ******************** BURAYA KENDİ İSMİNİ VE SOYADINI YAZ ********************
-    // Örnek: const YOUR_NAME = "Mehmet Yılmaz";
+    // Örnek: const YOUR_NAME = "Umut Ablay";
     const YOUR_NAME = "AD SOYADINIZ";
     // **********************************************************************
 
@@ -499,13 +499,13 @@
           if (!currentNames.includes(isim)) {
             // Bu isim listeden eksildi
             lastName = isim; // Son görülen eksilen ismi güncelle
-            sendNotification(isim + ", listenizden eksildi!");
+            sendNotification(isim + ", mola sırası sende!");
           }
         });
 
         // 2) Eğer şu an kimse yoksa (boş liste), son görülen ismi kullanarak bildirim gönder
         if (currentNames.length === 0 && lastName) {
-          sendNotification(lastName + ", listede kimse yok!");
+          sendNotification(lastName + ", mola sırası sende!");
         }
 
         // 3) Tabloya veri yazma
