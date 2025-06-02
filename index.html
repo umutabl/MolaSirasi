@@ -362,8 +362,8 @@
       Sıra bilgisi her <strong>5 saniyede</strong> güncellenir.
     </div>
     <div class="info-box">
-     <p class="degisken"></p>
-    </div>	
+      <p class="degisken"></p>
+    </div>  
 
     <!-- “Mola Sırasına Katıl” Butonu -->
     <a
@@ -405,181 +405,183 @@
     </div>
   </div>
 
-  <!-- ---------- JavaScript Kısmı (GÜNCELLENMİŞ BİLDİRİM KODU) ---------- -->
+  <!-- ---------- JavaScript Kısmı (DÜZELTİLMİŞ BİLDİRİM KODU) ---------- -->
   <script>
-  // ******************** BURAYA KENDİ İSMİNİ VE SOYADINI YAZ ********************
-  // Örnek: const YOUR_NAME = "Umut Ablay";
-  const YOUR_NAME = "AD SOYADINIZ";
-  // **********************************************************************
+    // ******************** BURAYA KENDİ İSMİNİ VE SOYADINI YAZ ********************
+    // Örnek: const YOUR_NAME = "Umut Ablay";
+    const YOUR_NAME = "AD SOYADINIZ";
+    // **********************************************************************
 
-  // 1) Mola Listesi için gerekli sabitler
-  const SHEET_ID = "1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q";
-  const SHEET_NAME_QUEUE = "Form Responses 1";
-  const BASE_URL_QUEUE =
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME_QUEUE)}&tqx=out:json`;
+    // 1) Mola Listesi için gerekli sabitler
+    const SHEET_ID = "1d6Syg8Y7nHxQpUvdMTXTpmETySPaTQxgXTFyPT_YB8Q";
+    const SHEET_NAME_QUEUE = "Form Responses 1";
+    const BASE_URL_QUEUE =
+      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME_QUEUE)}&tqx=out:json`;
 
-  // 2) Uyarı Mesajı için gerekli sabitler
-  const SHEET_NAME_WARNING = "Uyarı/Bilgilendirme Mesajı";
-  const BASE_URL_WARNING =
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME_WARNING)}&tqx=out:json`;
+    // 2) Uyarı Mesajı için gerekli sabitler
+    const SHEET_NAME_WARNING = "Uyarı/Bilgilendirme Mesajı";
+    const BASE_URL_WARNING =
+      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME_WARNING)}&tqx=out:json`;
 
-  // Önceki isim listesini ve son görülen ismi saklamak için
-  let previousNames = [];
-  let lastName = null;
+    // Önceki isim listesini ve son görülen ismi saklamak için
+    let previousNames = [];
+    let lastName = null;
 
-  // 5 saniyede bir mola listesini güncelleyen fonksiyon
-  async function refreshQueue() {
-    const loader = document.getElementById("loader");
-    const tbody = document.querySelector("#molaTable tbody");
+    // 5 saniyede bir mola listesini güncelleyen fonksiyon
+    async function refreshQueue() {
+      const loader = document.getElementById("loader");
+      const tbody = document.querySelector("#molaTable tbody");
 
-    // Loader'ı göster
-    loader.style.display = "block";
+      // Loader'ı göster
+      loader.style.display = "block";
 
-    try {
-      // Google Sheets'ten mola verisini çek
-      const res = await fetch(`${BASE_URL_QUEUE}&cacheBuster=${Date.now()}`, {
-        cache: "no-store",
-      });
-      const txt = await res.text();
-      // JSON parse etmek için metnin içinden gerçek JSON objesini ayıklıyoruz
-      const json = JSON.parse(
-        txt.slice(txt.indexOf("{"), txt.lastIndexOf("}") + 1)
-      );
-      const rows = json.table.rows || [];
-
-      // Gelen satırları filtrele (başlık satırlarını atla)
-      const dataRows = rows.filter((r) => {
-        const t = r.c?.[0]?.v;
-        const n = r.c?.[1]?.v;
-        return (
-          t &&
-          n &&
-          n.toString().toLowerCase() !== "ad soyad" &&
-          t.toString().toLowerCase() !== "zaman damgası"
-        );
-      });
-
-      // Mevcut isim listesi
-      const currentNames = dataRows.map((r) => r.c[1].v);
-
-      // Debug (isteğe bağlı)
-      console.log("------- Yenileme (Queue) -------");
-      console.log("Önceki İsimler:", previousNames);
-      console.log("Mevcut İsimler:", currentNames);
-
-      // 1) Önceki listede olup, şu anda olmayan isimler için bildirim
-      previousNames.forEach((isim) => {
-        if (!currentNames.includes(isim)) {
-          lastName = isim; // Son görülen eksilen ismi güncelle
-          sendNotification(isim + ", mola sırası sende!");
-        }
-      });
-
-      // 2) Listede kimse yoksa (boş liste) ve lastName varsa, bildirim
-      if (currentNames.length === 0 && lastName) {
-        sendNotification(lastName + ", mola sırası sende!");
-      }
-
-      // 3) Tabloya veri yazma
-      tbody.innerHTML = "";
-      if (dataRows.length > 0) {
-        dataRows.forEach((r, i) => {
-          const ts = r.c[0].f || r.c[0].v || "-";
-          const name = r.c[1].v || "-";
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${i + 1}</td><td>${ts}</td><td>${name}</td>`;
-          tbody.appendChild(tr);
+      try {
+        // Google Sheets'ten mola verisini çek
+        const res = await fetch(`${BASE_URL_QUEUE}&cacheBuster=${Date.now()}`, {
+          cache: "no-store",
         });
-      } else {
-        tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
+        const txt = await res.text();
+        // JSON parse etmek için metnin içinden gerçek JSON objesini ayıklıyoruz
+        const json = JSON.parse(
+          txt.slice(txt.indexOf("{"), txt.lastIndexOf("}") + 1)
+        );
+        const rows = json.table.rows || [];
+
+        // Gelen satırları filtrele (başlık satırlarını atla)
+        const dataRows = rows.filter((r) => {
+          const t = r.c?.[0]?.v;
+          const n = r.c?.[1]?.v;
+          return (
+            t &&
+            n &&
+            n.toString().toLowerCase() !== "ad soyad" &&
+            t.toString().toLowerCase() !== "zaman damgası"
+          );
+        });
+
+        // Mevcut isim listesi
+        const currentNames = dataRows.map((r) => r.c[1].v);
+
+        // Debug (isteğe bağlı)
+        console.log("------- Yenileme (Queue) -------");
+        console.log("Önceki İsimler:", previousNames);
+        console.log("Mevcut İsimler:", currentNames);
+
+        // 1) Önceki listede olup, şu anda olmayan isimler için bildirim
+        previousNames.forEach((isim) => {
+          if (!currentNames.includes(isim)) {
+            lastName = isim; // Son görülen eksilen ismi güncelle
+            sendNotification(isim + ", mola sırası sende!");
+          }
+        });
+
+        // 2) Listede kimse yoksa (boş liste) ve lastName varsa, bildirim
+        //    ve ardından lastName'i sıfırla
+        if (currentNames.length === 0 && lastName) {
+          sendNotification(lastName + ", mola sırası sende!");
+          lastName = null; // Tekrar tekrar bildirim gitmesini engeller
+        }
+
+        // 3) Tabloya veri yazma
+        tbody.innerHTML = "";
+        if (dataRows.length > 0) {
+          dataRows.forEach((r, i) => {
+            const ts = r.c[0].f || r.c[0].v || "-";
+            const name = r.c[1].v || "-";
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${i + 1}</td><td>${ts}</td><td>${name}</td>`;
+            tbody.appendChild(tr);
+          });
+        } else {
+          tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Listede kimse yok.</td></tr>`;
+        }
+
+        // Sonraki döngü için önceki isim listesini güncelle
+        previousNames = currentNames.slice();
+      } catch (e) {
+        console.error("Veri yüklenirken hata (Queue):", e);
+        tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
+      } finally {
+        // Loader'ı gizle
+        loader.style.display = "none";
       }
-
-      // Sonraki döngü için önceki isim listesini güncelle
-      previousNames = currentNames.slice();
-    } catch (e) {
-      console.error("Veri yüklenirken hata (Queue):", e);
-      tbody.innerHTML = `<tr><td colspan="3" class="placeholder">Veri yüklenemedi.</td></tr>`;
-    } finally {
-      // Loader'ı gizle
-      loader.style.display = "none";
     }
-  }
 
-  // 5 saniyede bir “Uyarı/Bilgilendirme Mesajı”nı çeken fonksiyon
-  async function refreshWarning() {
-    try {
-      const res = await fetch(`${BASE_URL_WARNING}&cacheBuster=${Date.now()}`, {
-        cache: "no-store",
-      });
-      const txt = await res.text();
-      const json = JSON.parse(
-        txt.slice(txt.indexOf("{"), txt.lastIndexOf("}") + 1)
-      );
-      const rows = json.table.rows || [];
+    // 5 saniyede bir “Uyarı/Bilgilendirme Mesajı”nı çeken fonksiyon
+    async function refreshWarning() {
+      try {
+        const res = await fetch(`${BASE_URL_WARNING}&cacheBuster=${Date.now()}`, {
+          cache: "no-store",
+        });
+        const txt = await res.text();
+        const json = JSON.parse(
+          txt.slice(txt.indexOf("{"), txt.lastIndexOf("}") + 1)
+        );
+        const rows = json.table.rows || [];
 
-      // Eğer satır varsa, ilk satırın ikinci sütununu (B1) al
-      if (rows.length > 0 && rows[0].c?.[1]?.v) {
-        const warningText = rows[0].c[1].v;
-        document.querySelector(".degisken").innerText = warningText;
-      } else {
+        // Eğer satır varsa, ilk satırın ikinci sütununu (B1) al
+        if (rows.length > 0 && rows[0].c?.[1]?.v) {
+          const warningText = rows[0].c[1].v;
+          document.querySelector(".degisken").innerText = warningText;
+        } else {
+          document.querySelector(".degisken").innerText = "";
+        }
+      } catch (e) {
+        console.error("Uyarı metni alınırken hata:", e);
         document.querySelector(".degisken").innerText = "";
       }
-    } catch (e) {
-      console.error("Uyarı metni alınırken hata:", e);
-      document.querySelector(".degisken").innerText = "";
     }
-  }
 
-  // Bildirim iznini almak için fonksiyon
-  function requestNotificationPermission() {
-    if (!("Notification" in window)) {
-      console.log("Notification API desteklenmiyor.");
-      return;
+    // Bildirim iznini almak için fonksiyon
+    function requestNotificationPermission() {
+      if (!("Notification" in window)) {
+        console.log("Notification API desteklenmiyor.");
+        return;
+      }
+      if (Notification.permission !== "granted") {
+        Notification.requestPermission()
+          .then(permission => {
+            console.log("Bildirim izni durumu:", permission);
+          })
+          .catch(err => {
+            console.error("Bildirim izni alınamadı:", err);
+          });
+      } else {
+        console.log("Bildirim izni zaten verilmiş:", Notification.permission);
+      }
     }
-    if (Notification.permission !== "granted") {
-      Notification.requestPermission()
-        .then(permission => {
-          console.log("Bildirim izni durumu:", permission);
-        })
-        .catch(err => {
-          console.error("Bildirim izni alınamadı:", err);
+
+    // Tarayıcı bildirimi ve ses oynatma
+    function sendNotification(message) {
+      if (Notification.permission === "granted") {
+        const notificationSound = new Audio(
+          "https://www.soundjay.com/button/beep-07.wav"
+        );
+        notificationSound.play().catch(() => {
+          // Ses çalamazsa sessizce devam et
         });
-    } else {
-      console.log("Bildirim izni zaten verilmiş:", Notification.permission);
+        new Notification(message);
+        console.log("Bildirim gönderildi:", message);
+      } else {
+        console.log("Bildirim izni verilmedi. Mesaj:", message);
+      }
     }
-  }
 
-  // Tarayıcı bildirimi ve ses oynatma
-  function sendNotification(message) {
-    if (Notification.permission === "granted") {
-      const notificationSound = new Audio(
-        "https://www.soundjay.com/button/beep-07.wav"
-      );
-      notificationSound.play().catch(() => {
-        // Ses çalamazsa sessizce devam et
-      });
-      new Notification(message);
-      console.log("Bildirim gönderildi:", message);
-    } else {
-      console.log("Bildirim izni verilmedi. Mesaj:", message);
-    }
-  }
-
-  // Sayfa yüklendiğinde:
-  // 1) Bildirim izni istenir
-  // 2) Hem queue hem warning fonksiyonları ilk defa çağrılır
-  // 3) 5 saniyede bir her iki fonksiyon da yeniden çalışır
-  window.addEventListener("load", () => {
-    requestNotificationPermission();
-    // İlk yükleme
-    refreshQueue();
-    refreshWarning();
-    // Her 5 saniyede bir yenile
-    setInterval(() => {
+    // Sayfa yüklendiğinde:
+    // 1) Bildirim izni istenir
+    // 2) Hem queue hem warning fonksiyonları ilk defa çağrılır
+    // 3) 5 saniyede bir her iki fonksiyon da yeniden çalışır
+    window.addEventListener("load", () => {
+      requestNotificationPermission();
+      // İlk yükleme
       refreshQueue();
       refreshWarning();
-    }, 5000);
-  });
-</script>
+      // Her 5 saniyede bir yenile
+      setInterval(() => {
+        refreshQueue();
+        refreshWarning();
+      }, 5000);
+    });
+  </script>
 </body>
 </html>
