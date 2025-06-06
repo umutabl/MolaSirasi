@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mola Sırası (v2)</title>
+  <title>Mola Sırası (v2) – Tema Geçişli</title>
   <!-- Google Fonts: Inter, Montserrat ve blob metni için Dongle -->
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600&family=Dongle&display=swap"
     rel="stylesheet"
   />
   <style>
-    /* ---------- DEĞİŞKENLER ---------- */
+    /* ---------- DEĞİŞKENLER (Light Mode) ---------- */
     :root {
       --primary-color: #002f6c;
       --light-bg: #ffffff;
@@ -37,6 +37,18 @@
       --blending: hard-light;
     }
 
+    /* ---------- DEĞİŞKENLER (Dark Mode) ---------- */
+    html.dark-mode {
+      --primary-color: #ffffff;
+      --light-bg: #121212;
+      --info-bg: #333333;
+      --button-bg: #444444;
+      --button-hover-bg: #666666;
+      --table-header-bg: #2a2a2a;
+      --table-row-even: #1e1e1e;
+      --text-muted: #cccccc;
+    }
+
     /* ---------- GLOBAL ---------- */
     html, body {
       min-height: 100vh;
@@ -48,7 +60,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative; /* gradient-bg'i kapsayacak şekilde */
+      position: relative; /* gradient-bg’i kapsayacak şekilde */
+      color: var(--primary-color);
     }
 
     /* ---------- GRADIENT BLOBS ARKA PLAN ---------- */
@@ -161,6 +174,7 @@
       position: relative; /* z-index tanımlamak için */
       z-index: 1;        /* Gradient’in üstünde */
       margin: 2rem auto;
+      color: var(--primary-color);
     }
     .logo {
       display: flex;
@@ -277,6 +291,8 @@
       border-radius: 8px;
       overflow: hidden;
       font-size: 0.95rem;
+      background-color: var(--light-bg);
+      color: var(--primary-color);
     }
     thead {
       background-color: var(--table-header-bg);
@@ -313,6 +329,33 @@
       font-size: 0.67rem;
       opacity: 0.9;      /* Telif hakkı biraz daha net */
     }
+
+    /* ---------- TEMA DEĞİŞTİRME BUTONU (DAHA DİKKAT ÇEKİCİ) ---------- */
+    .theme-toggle {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background-color: var(--button-bg);
+      color: #ffffff;
+      border: none;
+      padding: 8px 12px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      z-index: 2;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .theme-toggle:hover {
+      background-color: var(--button-hover-bg);
+      transform: translateY(-1px);
+    }
+    .theme-toggle:active {
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
@@ -344,6 +387,11 @@
 
   <!-- ---------- MEVCUT CARD BÖLÜMÜ ---------- -->
   <div class="card">
+    <!-- Tema Değiştirme Butonu (Daha belirgin ikon + metin) -->
+    <button id="themeToggleBtn" class="theme-toggle" title="Karanlık moda geç">
+      🌙 Karanlık
+    </button>
+
     <!-- Logo ve “TurkNet” Metni (Logotype olarak resim) -->
     <div class="logo">
       <img
@@ -405,7 +453,7 @@
     </div>
   </div>
 
-  <!-- ---------- JavaScript Kısmı (DÜZELTİLMİŞ BİLDİRİM KODU) ---------- -->
+  <!-- ---------- JavaScript Kısmı (DÜZELTİLMİŞ BİLDİRİM KODU ve TEMA GEÇİŞİ) ---------- -->
   <script>
   // ******************** BURAYA KENDİ İSMİNİ VE SOYADINI YAZ ********************
   // Örnek: const YOUR_NAME = "Umut Ablay";
@@ -567,12 +615,31 @@
     }
   }
 
+  // Tema geçişi için fonksiyon
+  function toggleTheme() {
+    document.documentElement.classList.toggle("dark-mode");
+    // Butonun içeriğini güncelle
+    const btn = document.getElementById("themeToggleBtn");
+    if (document.documentElement.classList.contains("dark-mode")) {
+      btn.textContent = "☀️ Açık";
+      btn.title = "Açık temaya geç";
+    } else {
+      btn.textContent = "🌙 Karanlık";
+      btn.title = "Karanlık temaya geç";
+    }
+  }
+
   // Sayfa yüklendiğinde:
   // 1) Bildirim izni istenir
   // 2) Hem queue hem warning fonksiyonları ilk defa çağrılır
   // 3) 5 saniyede bir her iki fonksiyon da yeniden çalışır
   window.addEventListener("load", () => {
     requestNotificationPermission();
+    // Tema düğmesine tıklama olayı
+    document
+      .getElementById("themeToggleBtn")
+      .addEventListener("click", toggleTheme);
+
     // İlk yükleme
     refreshQueue();
     refreshWarning();
@@ -582,8 +649,6 @@
       refreshWarning();
     }, 5000);
   });
-</script>
-
-
+  </script>
 </body>
 </html>
