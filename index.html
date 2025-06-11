@@ -3,13 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mola Sırası (v2) – Tema Geçişli</title>
+  <title>Mola Sırası</title>
   <!-- Google Fonts: Inter, Montserrat ve blob metni için Dongle -->
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600&family=Dongle&display=swap"
     rel="stylesheet"
   />
   <style>
+#canvas-stars {
+      background: black;
+      z-index: 2;
+    }
+#canvas-stars, #canvas-shapes {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    #canvas-shapes { z-index: 2; }
+    #toggleHint {
+      color: #8f9ebb;
+      font-size: 16px;
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      z-index: 3;
+      user-select: none;
+      margin: 0;
+    }
+    #logoImg { display: none; }
+
     /* ---------- DEĞİŞKENLER (Light Mode) ---------- */
     :root {
       --primary-color: #002f6c;
@@ -359,6 +383,14 @@
   </style>
 </head>
 <body>
+<!-- ⭐ Yıldız Arka Planı -->
+  <canvas id="canvas-stars"></canvas>
+  <!-- 🔄 Animasyon İpucu -->
+    <!-- ⚪ Nokta Partikülleri -->
+  <canvas id="canvas-shapes"></canvas>
+  <!-- Gizli Logo Görseli -->
+  <img id="logoImg" src="https://ik.imagekit.io/wbmhgi2rc/1e011ac7-9090-44f2-bb80-4fb5b664d66c_removalai_preview%20(2).png" crossOrigin="anonymous" alt="Logo" />
+  <!-- GSAP v1 -->
   <!-- ---------- GRADIENT BLOBS ARKA PLAN ---------- -->
   <div class="gradient-bg">
     <svg xmlns="http://www.w3.org/2000/svg">
@@ -454,7 +486,143 @@
   </div>
 
   <!-- ---------- JavaScript Kısmı (DÜZELTİLMİŞ BİLDİRİM KODU ve TEMA GEÇİŞİ) ---------- -->
-  <script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenLite.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/easing/EasePack.min.js"></script>  
+<script>
+/* === 1) Yıldız Arka Planı === */
+    (function() {
+      const canvas = document.getElementById('canvas-stars');
+      const ctx = canvas.getContext('2d');
+      const dotRadius = 2;                          // Logo partikül boyu
+      const colors = ['#002F6C', '#FFD400'];       // TurkNet lacivert ve sarı
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      class Star {
+        constructor() {
+          this.reset();
+        }
+        reset() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.r = dotRadius;
+          this.a = Math.random() * 0.5 + 0.3;
+          this.da = (Math.random() * 0.005 + 0.002) * (Math.random() < 0.5 ? 1 : -1);
+          this.color = colors[Math.floor(Math.random() * colors.length)];
+        }
+        update() {
+          this.a += this.da;
+          if (this.a <= 0.1 || this.a >= 1) this.da *= -1;
+        }
+        draw() {
+          ctx.save();
+          ctx.globalAlpha = this.a;
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      let stars = [];
+      function initStars() {
+        stars = [];
+        const count = Math.floor((window.innerWidth + window.innerHeight) / 8);
+        for (let i = 0; i < count; i++) stars.push(new Star());
+      }
+      initStars();
+      window.addEventListener('resize', initStars);
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => { s.update(); s.draw(); });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+
+    /* === 2) Partiküllerden Logoya Birleşme === */
+    (function() {
+      const stage = document.getElementById('canvas-shapes');
+      const ctx2 = stage.getContext('2d');
+      const img = document.getElementById('logoImg');
+      const imageW = 250, imageH = 250;
+      const dotRadius = 1.5;
+      let w, h;
+
+      const offCanvas = document.createElement('canvas');
+      const offCtx = offCanvas.getContext('2d');
+      offCanvas.width = imageW;
+      offCanvas.height = imageH;
+
+      const dots = [];
+      function resize() {
+        w = stage.width = window.innerWidth;
+        h = stage.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function Dot(x,y,r,g,b,imgX,imgY) {
+        this.x = x; this.y = y;
+        this.r = r; this.g = g; this.b = b;
+        this.targetX = imgX + (w-imageW)/2;
+        this.targetY = imgY + (h-imageH)/2;
+      }
+      Dot.prototype.draw = function() {
+        ctx2.beginPath();
+        ctx2.arc(this.x, this.y, dotRadius, 0, 2*Math.PI);
+        ctx2.fillStyle = `rgb(${this.r},${this.g},${this.b})`;
+        ctx2.fill();
+      };
+
+      function loop() {
+        ctx2.clearRect(0,0,w,h);
+        dots.forEach(d => d.draw());
+        requestAnimationFrame(loop);
+      }
+      loop();
+
+      function processImage() {
+        offCtx.clearRect(0,0,imageW,imageH);
+        offCtx.drawImage(img,0,0,imageW,imageH);
+        const data = offCtx.getImageData(0,0,imageW,imageH).data;
+        const pixels = [];
+        for (let i=0; i<data.length; i+=4) {
+          if (data[i+3]!==0) {
+            const idx=i/4;
+            const x=idx%imageW, y=Math.floor(idx/imageW);
+            if (x%(dotRadius*2+1)===0 && y%(dotRadius*2+1)===0) {
+              pixels.push({x,y,r:data[i],g:data[i+1],b:data[i+2]});
+            }
+          }
+        }
+        createDots(pixels);
+      }
+
+      function createDots(pixels) {
+        pixels.forEach(p => {
+          const startX = Math.random()*w;
+          const startY = Math.random()*h;
+          const dot = new Dot(startX,startY,p.r,p.g,p.b,p.x,p.y);
+          dots.push(dot);
+          // Daha yavaş birleşme: süre 2-3 saniye, gecikme 0.5-1 saniye
+          const dur = 2 + Math.random() * 1;
+          const delay = 0.5 + Math.random() * 0.5;
+          TweenLite.to(dot, dur, { x:dot.targetX, y:dot.targetY, ease:Cubic.easeInOut, delay:delay });
+        });
+      }
+
+      if (img.complete) processImage();
+      else img.onload = processImage;
+    })();
+
   // ******************** BURAYA KENDİ İSMİNİ VE SOYADINI YAZ ********************
   // Örnek: const YOUR_NAME = "Umut Ablay";
   const YOUR_NAME = "AD SOYADINIZ";
@@ -648,6 +816,16 @@
       refreshQueue();
       refreshWarning();
     }, 5000);
+ setTimeout(() => {
+    document
+      .querySelectorAll('#canvas-shapes, #canvas-stars')
+      .forEach(canvas => {
+        // 1) Opacity’yi 0’a çek
+        canvas.classList.add('fade-out');
+        // 2) 1s sonra tamamen DOM’dan da kaldır (isteğe bağlı)
+        setTimeout(() => canvas.remove(), 1000);
+      });
+  }, 3000);
   });
   </script>
 </body>
