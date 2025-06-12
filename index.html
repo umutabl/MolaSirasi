@@ -490,138 +490,195 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/easing/EasePack.min.js"></script>  
 <script>
 /* === 1) Yıldız Arka Planı === */
-    (function() {
-      const canvas = document.getElementById('canvas-stars');
-      const ctx = canvas.getContext('2d');
-      const dotRadius = 2;                          // Logo partikül boyu
-      const colors = ['#002F6C', '#FFD400'];       // TurkNet lacivert ve sarı
+     (function() {
+    const canvas = document.getElementById('canvas-stars');
+    const ctx = canvas.getContext('2d');
+    const dotRadius = 2;
+    const colors = ['#002F6C', '#FFD400'];
 
-      function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-      window.addEventListener('resize', resize);
-      resize();
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
 
-      class Star {
-        constructor() {
-          this.reset();
-        }
-        reset() {
-          this.x = Math.random() * canvas.width;
-          this.y = Math.random() * canvas.height;
-          this.r = dotRadius;
-          this.a = Math.random() * 0.5 + 0.3;
-          this.da = (Math.random() * 0.005 + 0.002) * (Math.random() < 0.5 ? 1 : -1);
-          this.color = colors[Math.floor(Math.random() * colors.length)];
-        }
-        update() {
-          this.a += this.da;
-          if (this.a <= 0.1 || this.a >= 1) this.da *= -1;
-        }
-        draw() {
-          ctx.save();
-          ctx.globalAlpha = this.a;
-          ctx.fillStyle = this.color;
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
+    function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius, fillStyle, alpha) {
+      let rot = Math.PI / 2 * 3;
+      let x = cx;
+      let y = cy;
+      let step = Math.PI / spikes;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - outerRadius);
+      for (let i = 0; i < spikes; i++) {
+        x = cx + Math.cos(rot) * outerRadius;
+        y = cy + Math.sin(rot) * outerRadius;
+        ctx.lineTo(x, y);
+        rot += step;
+        x = cx + Math.cos(rot) * innerRadius;
+        y = cy + Math.sin(rot) * innerRadius;
+        ctx.lineTo(x, y);
+        rot += step;
       }
+      ctx.closePath();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = fillStyle;
+      ctx.fill();
+      ctx.restore();
+    }
 
-      let stars = [];
-      function initStars() {
-        stars = [];
-        const count = Math.floor((window.innerWidth + window.innerHeight) / 8);
-        for (let i = 0; i < count; i++) stars.push(new Star());
+    class Star {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.r = dotRadius;
+        this.a = Math.random() * 0.5 + 0.3;
+        this.da = (Math.random() * 0.005 + 0.002) * (Math.random() < 0.5 ? 1 : -1);
+        this.color = colors[Math.floor(Math.random() * colors.length)];
       }
-      initStars();
-      window.addEventListener('resize', initStars);
+      update() {
+        this.a += this.da;
+        if (this.a <= 0.1 || this.a >= 1) this.da *= -1;
+      }
+      draw() {
+        drawStar(ctx, this.x, this.y, 5, this.r * 2, this.r, this.color, this.a);
+      }
+    }
 
-      function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        stars.forEach(s => { s.update(); s.draw(); });
-        requestAnimationFrame(animate);
-      }
-      animate();
-    })();
+    let stars = [];
+    function initStars() {
+      stars = [];
+      const count = Math.floor((window.innerWidth + window.innerHeight) / 8);
+      for (let i = 0; i < count; i++) stars.push(new Star());
+    }
+    initStars();
+    window.addEventListener('resize', initStars);
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => { s.update(); s.draw(); });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  })();
 
     /* === 2) Partiküllerden Logoya Birleşme === */
     (function() {
-      const stage = document.getElementById('canvas-shapes');
-      const ctx2 = stage.getContext('2d');
-      const img = document.getElementById('logoImg');
-      const imageW = 250, imageH = 250;
-      const dotRadius = 1.5;
-      let w, h;
+  const stage = document.getElementById('canvas-shapes');
+  const ctx2 = stage.getContext('2d');
+  const img = document.getElementById('logoImg');
+  const imageW = 250, imageH = 250;
+  const dotRadius = 1.5;
+  let w, h;
 
-      const offCanvas = document.createElement('canvas');
-      const offCtx = offCanvas.getContext('2d');
-      offCanvas.width = imageW;
-      offCanvas.height = imageH;
+  const offCanvas = document.createElement('canvas');
+  const offCtx = offCanvas.getContext('2d');
+  offCanvas.width = imageW;
+  offCanvas.height = imageH;
 
-      const dots = [];
-      function resize() {
-        w = stage.width = window.innerWidth;
-        h = stage.height = window.innerHeight;
-      }
-      window.addEventListener('resize', resize);
-      resize();
+  const dots = [];
 
-      function Dot(x,y,r,g,b,imgX,imgY) {
-        this.x = x; this.y = y;
-        this.r = r; this.g = g; this.b = b;
-        this.targetX = imgX + (w-imageW)/2;
-        this.targetY = imgY + (h-imageH)/2;
-      }
-      Dot.prototype.draw = function() {
-        ctx2.beginPath();
-        ctx2.arc(this.x, this.y, dotRadius, 0, 2*Math.PI);
-        ctx2.fillStyle = `rgb(${this.r},${this.g},${this.b})`;
-        ctx2.fill();
-      };
+  function resize() {
+    w = stage.width = window.innerWidth;
+    h = stage.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
 
-      function loop() {
-        ctx2.clearRect(0,0,w,h);
-        dots.forEach(d => d.draw());
-        requestAnimationFrame(loop);
-      }
-      loop();
+  // ★ Yıldız çizme fonksiyonu
+  function drawStar(ctx, cx, cy, spikes, outerR, innerR, fillStyle, alpha) {
+    let rot = Math.PI / 2 * 3;
+    const step = Math.PI / spikes;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - outerR);
+    for (let i = 0; i < spikes; i++) {
+      // dış uç
+      ctx.lineTo(
+        cx + Math.cos(rot) * outerR,
+        cy + Math.sin(rot) * outerR
+      );
+      rot += step;
+      // iç uç
+      ctx.lineTo(
+        cx + Math.cos(rot) * innerR,
+        cy + Math.sin(rot) * innerR
+      );
+      rot += step;
+    }
+    ctx.closePath();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = fillStyle;
+    ctx.fill();
+    ctx.restore();
+  }
 
-      function processImage() {
-        offCtx.clearRect(0,0,imageW,imageH);
-        offCtx.drawImage(img,0,0,imageW,imageH);
-        const data = offCtx.getImageData(0,0,imageW,imageH).data;
-        const pixels = [];
-        for (let i=0; i<data.length; i+=4) {
-          if (data[i+3]!==0) {
-            const idx=i/4;
-            const x=idx%imageW, y=Math.floor(idx/imageW);
-            if (x%(dotRadius*2+1)===0 && y%(dotRadius*2+1)===0) {
-              pixels.push({x,y,r:data[i],g:data[i+1],b:data[i+2]});
-            }
-          }
+  // Dot sınıfı
+  function Dot(x, y, r, g, b, imgX, imgY) {
+    this.x = x; this.y = y;
+    this.r = r; this.g = g; this.b = b;
+    this.targetX = imgX + (w - imageW) / 2;
+    this.targetY = imgY + (h - imageH) / 2;
+  }
+  // ★ draw() artık yıldız çiziyor
+  Dot.prototype.draw = function() {
+    drawStar(
+      ctx2,
+      this.x, this.y,
+      5,                 // 5 uçlu yıldız
+      dotRadius * 2,     // dış yarıçap
+      dotRadius,         // iç yarıçap
+      `rgb(${this.r},${this.g},${this.b})`,
+      1                  // opaklık (1 = tam görünür)
+    );
+  };
+
+  function loop() {
+    ctx2.clearRect(0, 0, w, h);
+    dots.forEach(d => d.draw());
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  function processImage() {
+    offCtx.clearRect(0, 0, imageW, imageH);
+    offCtx.drawImage(img, 0, 0, imageW, imageH);
+    const data = offCtx.getImageData(0, 0, imageW, imageH).data;
+    const pixels = [];
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i+3] !== 0) {
+        const idx = i / 4;
+        const x = idx % imageW, y = Math.floor(idx / imageW);
+        if (x % (dotRadius * 2 + 1) === 0 && y % (dotRadius * 2 + 1) === 0) {
+          pixels.push({ x, y, r: data[i], g: data[i+1], b: data[i+2] });
         }
-        createDots(pixels);
       }
+    }
+    createDots(pixels);
+  }
 
-      function createDots(pixels) {
-        pixels.forEach(p => {
-          const startX = Math.random()*w;
-          const startY = Math.random()*h;
-          const dot = new Dot(startX,startY,p.r,p.g,p.b,p.x,p.y);
-          dots.push(dot);
-          // Daha yavaş birleşme: süre 2-3 saniye, gecikme 0.5-1 saniye
-          const dur = 2 + Math.random() * 1;
-          const delay = 0.5 + Math.random() * 0.5;
-          TweenLite.to(dot, dur, { x:dot.targetX, y:dot.targetY, ease:Cubic.easeInOut, delay:delay });
-        });
-      }
+  function createDots(pixels) {
+    pixels.forEach(p => {
+      const startX = Math.random() * w;
+      const startY = Math.random() * h;
+      const dot = new Dot(startX, startY, p.r, p.g, p.b, p.x, p.y);
+      dots.push(dot);
+      const dur = 2 + Math.random() * 1;
+      const delay = 0.5 + Math.random() * 0.5;
+      TweenLite.to(dot, dur, {
+        x: dot.targetX,
+        y: dot.targetY,
+        ease: Cubic.easeInOut,
+        delay: delay
+      });
+    });
+  }
 
-      if (img.complete) processImage();
-      else img.onload = processImage;
-    })();
+  if (img.complete) processImage();
+  else img.onload = processImage;
+})();
 
   // ******************** BURAYA KENDİ İSMİNİ VE SOYADINI YAZ ********************
   // Örnek: const YOUR_NAME = "Umut Ablay";
@@ -825,7 +882,7 @@
         // 2) 1s sonra tamamen DOM’dan da kaldır (isteğe bağlı)
         setTimeout(() => canvas.remove(), 1000);
       });
-  }, 3000);
+  }, 3800);
   });
   </script>
 </body>
